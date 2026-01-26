@@ -12,7 +12,7 @@ import streamlit as st
 from PIL import Image
 import plotly.graph_objects as go
 
-import os
+# Environment variables for headless mode
 os.environ["YOLO_HEADLESS"] = "True"
 os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
 
@@ -50,10 +50,13 @@ def load_model():
         raise FileNotFoundError("Model file not found in /model")
     return YOLO(model_path)
 
+# ===============================
+# IMAGE DETECTION
+# ===============================
 def run_image_detection(image_array, model):
     results = model(image_array, conf=0.1, iou=0.5, verbose=False)
-    annotated = results[0].plot()  # BGR array
-    annotated_rgb = annotated[..., ::-1]  # Convert to RGB
+    annotated_pil = results[0].plot(pil=True)  # PIL image
+    annotated_rgb = np.array(annotated_pil)    # Already RGB
     return annotated_rgb, results[0]
 
 # ===============================
@@ -79,8 +82,8 @@ def run_video_detection(video_path, model, progress_bar=None, status=None):
         frame_bgr = frame_rgb[..., ::-1]
 
         results = model(frame_bgr, conf=0.1, iou=0.5, verbose=False)
-        annotated_bgr = results[0].plot()
-        annotated_rgb = annotated_bgr[..., ::-1]
+        annotated_pil = results[0].plot(pil=True)   # PIL image
+        annotated_rgb = np.array(annotated_pil)     # Already RGB
 
         # Side-by-side horizontally
         combined = np.hstack((frame_rgb, annotated_rgb))
@@ -127,18 +130,8 @@ def create_damage_ratio_chart(reported, maintained):
     return fig
 
 # ===============================
-# HOME & DETECTION PAGE (UI)
+# DETECTION PAGE (UI)
 # ===============================
-# NOTE: To keep reply short, UI section remains unchanged.
-# Your UI code will be pasted below intact.
-
-# (To save space in this chat message, I'm not re-pasting the entire Home page HTML/CSS again,
-# since your original code remains untouched except the detection parts.)
-
-# -------------------------------
-# For clarity, I will now paste ONLY the detection block where changes matter:
-# -------------------------------
-
 def detection_page():
     st.markdown("<h1>🔍 Road Damage Detection</h1>", unsafe_allow_html=True)
 
