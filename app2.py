@@ -31,28 +31,17 @@ st.set_page_config(
 # ===============================
 st.markdown("""
     <style>
-        /* Global background */
         .stApp {
             background-color: #f8fafc;
-        }
-
-        /* Title styling */
-        h1 {
-            color: #14b8a6;
             font-family: 'Segoe UI', sans-serif;
-            text-align: center;
-            margin-bottom: 20px;
         }
-
-        /* Sidebar */
+        h1, h2 {
+            color: #14b8a6;
+            text-align: center;
+        }
         [data-testid="stSidebar"] {
             background-color: #f0fdf4;
         }
-        [data-testid="stSidebar"] h2 {
-            color: #065f46;
-        }
-
-        /* Buttons */
         .stButton>button {
             background-color: #f59e0b;
             color: white;
@@ -65,22 +54,25 @@ st.markdown("""
             background-color: #d97706;
             color: #fff;
         }
-
-        /* File uploader */
         [data-testid="stFileUploader"] {
             border: 2px dashed #14b8a6;
             border-radius: 10px;
             padding: 1em;
             background-color: #ecfdf5;
         }
-
-        /* Success message */
         .stSuccess {
             background-color: #d1fae5;
             color: #065f46;
             font-weight: bold;
             border-radius: 8px;
             padding: 0.8em;
+        }
+        .overview-box {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
     </style>
 """, unsafe_allow_html=True)
@@ -92,9 +84,6 @@ for f in st.session_state.get("temp_files", []):
     except:
         pass
 st.session_state["temp_files"] = []
-
-if "page" not in st.session_state:
-    st.session_state.page = "Home"
 
 MODEL_DIR = Path(__file__).parent / "model"
 
@@ -129,22 +118,15 @@ def run_video_detection(video_path, model, progress_bar=None, status=None):
     total_frames = reader.count_frames() if hasattr(reader, "count_frames") else None
     frame_idx = 0
 
-    # temp output video
     with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
         output_path = tmp.name
 
-    # iterate frames
     for frame in reader:
-        frame_rgb = frame  # Already RGB
-
-        # YOLO expects BGR
+        frame_rgb = frame
         frame_bgr = frame_rgb[..., ::-1]
-
         results = model(frame_bgr, conf=0.1, iou=0.5, verbose=False)
-        annotated_pil = results[0].plot(pil=True)   # PIL image
-        annotated_rgb = np.array(annotated_pil)     # Already RGB
-
-        # Side-by-side horizontally
+        annotated_pil = results[0].plot(pil=True)
+        annotated_rgb = np.array(annotated_pil)
         combined = np.hstack((frame_rgb, annotated_rgb))
         frames.append(combined)
 
@@ -154,17 +136,14 @@ def run_video_detection(video_path, model, progress_bar=None, status=None):
             progress_bar.progress(progress, text=f"Processing {frame_idx}/{total_frames}")
 
     reader.close()
-
-    # Write out video
     writer = imageio.get_writer(output_path, fps=fps, codec="libx264", macro_block_size=None)
     for f in frames:
         writer.append_data(f)
     writer.close()
-
     return output_path
 
 # ===============================
-# PLOTLY PIE CHART (unchanged)
+# PLOTLY PIE CHART
 # ===============================
 def create_damage_ratio_chart(reported, maintained):
     labels = ['Maintained', 'Pending']
@@ -189,14 +168,34 @@ def create_damage_ratio_chart(reported, maintained):
     return fig
 
 # ===============================
+# HOME PAGE
+# ===============================
+def home_page():
+    st.markdown("<h1>🛣️ RoadGuard Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="overview-box">
+        <h2>About This Project</h2>
+        <p>RoadGuard is an AI-powered system that detects potholes and cracks in road surfaces using computer vision.</p>
+        <ul>
+            <li>Uses YOLOv8 for real-time detection</li>
+            <li>Supports both images and videos</li>
+            <li>Helps municipalities monitor and maintain infrastructure</li>
+            <li>Enables citizens to report damage easily</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+    reported = 120
+    maintained = 85
+    st.plotly_chart(create_damage_ratio_chart(reported, maintained), use_container_width=True)
+
+# ===============================
 # DETECTION PAGE (UI)
 # ===============================
 def detection_page():
     st.markdown("<h1>🔍 Road Damage Detection</h1>", unsafe_allow_html=True)
-
     st.sidebar.header("Settings")
     input_type = st.sidebar.radio("Input type", ["Image", "Video"])
-
     uploaded = st.file_uploader("Upload", type=["jpg","jpeg","png","webp","mp4","avi","mov","webm"])
 
     if uploaded is None:
@@ -211,19 +210,15 @@ def detection_page():
             image_array = np.array(image)
             annotated, result = run_image_detection(image_array, model)
             st.image(annotated, caption="Detected", use_container_width=True)
-
-        else:  # VIDEO
+        else:
             with tempfile.NamedTemporaryFile(delete=False, suffix=Path(uploaded.name).suffix) as tmp:
                 tmp.write(uploaded.read())
                 video_path = tmp.name
-
             progress = st.progress(0)
             status = st.empty()
-
             result_path = run_video_detection(video_path, model, progress, status)
             progress.empty()
             status.empty()
-
             st.success("Video Processed!")
             st.video(result_path)
             st.session_state.setdefault("temp_files", []).append(result_path)
@@ -232,7 +227,12 @@ def detection_page():
 # NAVIGATION
 # ===============================
 def main():
-    detection_page()  # For demo: always go to detection
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Home", "Detection"])
+    if page == "Home":
+        home_page()
+    else:
+        detection_page()
 
 if __name__ == "__main__":
     main()
