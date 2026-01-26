@@ -1,7 +1,10 @@
 [global]
 disableWatchdogWarning = true
+
 [theme]
-primaryColor = "#0ea5e9"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f1f5f9"
-textColor = "#1e293b"
+base="light"
+primaryColor="#14b8a6"
+backgroundColor="#f8fafc"
+secondaryBackgroundColor="#ecfdf5"
+textColor="#065f46"
+font="sans serif"
