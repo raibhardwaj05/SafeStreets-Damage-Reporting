@@ -1,6 +1,6 @@
 # ============================
 # RoadGuard — Streamlit App
-# Side-by-Side Video (No OpenCV)
+# Dark Theme with Home Cards
 # ============================
 
 import os
@@ -11,12 +11,11 @@ import imageio
 import streamlit as st
 from PIL import Image
 import plotly.graph_objects as go
+from ultralytics import YOLO
 
-# Environment variables for headless mode
+# Environment variables
 os.environ["YOLO_HEADLESS"] = "True"
 os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
-
-from ultralytics import YOLO
 
 # Page config
 st.set_page_config(
@@ -27,57 +26,58 @@ st.set_page_config(
 )
 
 # ===============================
-# CUSTOM STYLES
+# DARK THEME STYLES
 # ===============================
 st.markdown("""
     <style>
         .stApp {
-            background-color: #f8fafc;
+            background-color: #121212;
+            color: #e0e0e0;
             font-family: 'Segoe UI', sans-serif;
         }
         h1, h2 {
-            color: #14b8a6;
+            color: #80cbc4;
             text-align: center;
         }
         [data-testid="stSidebar"] {
-            background-color: #f0fdf4;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
         }
         .stButton>button {
-            background-color: #f59e0b;
-            color: white;
+            background-color: #ff9800;
+            color: #000;
             border-radius: 8px;
             padding: 0.6em 1.2em;
             font-weight: bold;
             border: none;
         }
         .stButton>button:hover {
-            background-color: #d97706;
+            background-color: #f57c00;
             color: #fff;
         }
-        [data-testid="stFileUploader"] {
-            border: 2px dashed #14b8a6;
-            border-radius: 10px;
-            padding: 1em;
-            background-color: #ecfdf5;
-        }
-        .stSuccess {
-            background-color: #d1fae5;
-            color: #065f46;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 0.8em;
-        }
-        .overview-box {
-            background-color: #ffffff;
-            border-radius: 10px;
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 12px;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin: 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card h3 {
+            color: #ffb74d;
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            color: #e0e0e0;
+            font-size: 0.95rem;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Cleanup old temp files safely at app start
+# Cleanup old temp files
 for f in st.session_state.get("temp_files", []):
     try:
         os.unlink(f)
@@ -103,18 +103,17 @@ def load_model():
 # ===============================
 def run_image_detection(image_array, model):
     results = model(image_array, conf=0.1, iou=0.5, verbose=False)
-    annotated_pil = results[0].plot(pil=True)  # PIL image
-    annotated_rgb = np.array(annotated_pil)    # Already RGB
+    annotated_pil = results[0].plot(pil=True)
+    annotated_rgb = np.array(annotated_pil)
     return annotated_rgb, results[0]
 
 # ===============================
-# VIDEO PROCESSOR (SIDE-BY-SIDE)
+# VIDEO DETECTION
 # ===============================
 def run_video_detection(video_path, model, progress_bar=None, status=None):
     reader = imageio.get_reader(video_path)
     fps = reader.get_meta_data().get("fps", 24)
     frames = []
-
     total_frames = reader.count_frames() if hasattr(reader, "count_frames") else None
     frame_idx = 0
 
@@ -143,12 +142,12 @@ def run_video_detection(video_path, model, progress_bar=None, status=None):
     return output_path
 
 # ===============================
-# PLOTLY PIE CHART
+# PIE CHART
 # ===============================
 def create_damage_ratio_chart(reported, maintained):
     labels = ['Maintained', 'Pending']
     values = [maintained, reported - maintained]
-    colors = ['#14b8a6', '#f59e0b']
+    colors = ['#4caf50', '#ff5722']
     fig = go.Figure(data=[go.Pie(
         labels=labels,
         values=values,
@@ -156,14 +155,15 @@ def create_damage_ratio_chart(reported, maintained):
         marker_colors=colors,
         textinfo='label+percent',
         textfont_size=16,
-        marker=dict(line=dict(color='#FFFFFF', width=3))
+        marker=dict(line=dict(color='#121212', width=3))
     )])
     fig.update_layout(
-        title={'text': 'Road Damage Status', 'x': 0.5},
+        title={'text': 'Road Damage Status', 'x': 0.5, 'font': {'color': '#e0e0e0'}},
         showlegend=True,
         height=400,
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='#121212',
+        plot_bgcolor='#121212',
+        font=dict(color='#e0e0e0')
     )
     return fig
 
@@ -172,25 +172,35 @@ def create_damage_ratio_chart(reported, maintained):
 # ===============================
 def home_page():
     st.markdown("<h1>🛣️ RoadGuard Dashboard</h1>", unsafe_allow_html=True)
-    st.markdown("""
-    <div class="overview-box">
-        <h2>About This Project</h2>
-        <p>RoadGuard is an AI-powered system that detects potholes and cracks in road surfaces using computer vision.</p>
-        <ul>
-            <li>Uses YOLOv8 for real-time detection</li>
-            <li>Supports both images and videos</li>
-            <li>Helps municipalities monitor and maintain infrastructure</li>
-            <li>Enables citizens to report damage easily</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
 
+    # Cards explaining project
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div class="card">
+            <h3>🚧 What is RoadGuard?</h3>
+            <p>RoadGuard is an AI-powered system that detects potholes and cracks in road surfaces using YOLOv8.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="card">
+            <h3>🌍 Why is it helpful?</h3>
+            <p>It helps municipalities monitor infrastructure, prioritize maintenance, and allows citizens to report damage easily.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Damage overview chart
     reported = 120
     maintained = 85
     st.plotly_chart(create_damage_ratio_chart(reported, maintained), use_container_width=True)
 
+    # Button to move to Detection page
+    if st.button("🔍 Go to Detection Page"):
+        st.session_state.page = "Detection"
+
 # ===============================
-# DETECTION PAGE (UI)
+# DETECTION PAGE
 # ===============================
 def detection_page():
     st.markdown("<h1>🔍 Road Damage Detection</h1>", unsafe_allow_html=True)
@@ -228,11 +238,17 @@ def detection_page():
 # ===============================
 def main():
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Home", "Detection"])
-    if page == "Home":
+    if "page" not in st.session_state:
+        st.session_state.page = "Home"
+
+    if st.session_state.page == "Home":
         home_page()
     else:
         detection_page()
+
+    # Sidebar navigation override
+    page_choice = st.sidebar.radio("Go to", ["Home", "Detection"], index=0 if st.session_state.page=="Home" else 1)
+    st.session_state.page = page_choice
 
 if __name__ == "__main__":
     main()
