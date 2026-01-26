@@ -26,6 +26,65 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ===============================
+# CUSTOM STYLES
+# ===============================
+st.markdown("""
+    <style>
+        /* Global background */
+        .stApp {
+            background-color: #f8fafc;
+        }
+
+        /* Title styling */
+        h1 {
+            color: #14b8a6;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Sidebar */
+        [data-testid="stSidebar"] {
+            background-color: #f0fdf4;
+        }
+        [data-testid="stSidebar"] h2 {
+            color: #065f46;
+        }
+
+        /* Buttons */
+        .stButton>button {
+            background-color: #f59e0b;
+            color: white;
+            border-radius: 8px;
+            padding: 0.6em 1.2em;
+            font-weight: bold;
+            border: none;
+        }
+        .stButton>button:hover {
+            background-color: #d97706;
+            color: #fff;
+        }
+
+        /* File uploader */
+        [data-testid="stFileUploader"] {
+            border: 2px dashed #14b8a6;
+            border-radius: 10px;
+            padding: 1em;
+            background-color: #ecfdf5;
+        }
+
+        /* Success message */
+        .stSuccess {
+            background-color: #d1fae5;
+            color: #065f46;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 0.8em;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Cleanup old temp files safely at app start
 for f in st.session_state.get("temp_files", []):
     try:
