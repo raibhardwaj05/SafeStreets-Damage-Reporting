@@ -14,6 +14,7 @@ import plotly.graph_objects as go
 
 import os
 os.environ["YOLO_HEADLESS"] = "True"
+os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
 
 from ultralytics import YOLO
 
