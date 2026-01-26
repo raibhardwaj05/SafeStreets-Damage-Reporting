@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# Build / output
+frontend/dist/
+backend/outputs/
+*.mp4
+
+# Env
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
