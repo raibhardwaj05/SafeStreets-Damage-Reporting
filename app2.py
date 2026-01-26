@@ -11,6 +11,10 @@ import imageio
 import streamlit as st
 from PIL import Image
 import plotly.graph_objects as go
+
+import os
+os.environ["YOLO_HEADLESS"] = "True"
+
 from ultralytics import YOLO
 
 # Page config
