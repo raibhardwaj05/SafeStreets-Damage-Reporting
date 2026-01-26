@@ -1,6 +1,6 @@
 # ============================
 # RoadGuard — Streamlit App
-# Dark Theme with Home Cards
+# Dark Theme with Home Cards & Navigation
 # ============================
 
 import os
@@ -71,8 +71,12 @@ st.markdown("""
             margin-bottom: 0.5rem;
         }
         .card p {
-            color: #e0e0e0;
+            color: #f5f5f5;
             font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        ul li {
+            color: #f5f5f5;
         }
     </style>
 """, unsafe_allow_html=True)
