@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Login - Road Damage Detection</title>
+    <link rel="stylesheet" href="../shared/styles.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --border: #f1f5f9;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            color: var(--text-main);
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            padding: 3.5rem 2.5rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .org-logo {
+            width: 48px;
+            height: 48px;
+            background: #eff6ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--primary);
+        }
+
+        .org-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-light);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .login-header h1 {
+            color: var(--text-main);
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #334155;
+            margin: 0;
+        }
+
+        .forgot-password {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-light);
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.8rem !important;
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            font-size: 1rem !important;
+            transition: all 0.2s !important;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary) !important;
+            background: #fff !important;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08) !important;
+            outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-login {
+            width: 100%;
+            background: var(--primary) !important;
+            color: #fff !important;
+            border: none !important;
+            padding: 1rem !important;
+            border-radius: 14px !important;
+            font-size: 1.05rem !important;
+            font-weight: 700 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.75rem !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+            margin-top: 2rem !important;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-hover) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .login-footer {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px dashed #e2e8f0;
+            text-align: center;
+        }
+
+        .personnel-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .back-link-container {
+            margin-top: 2.5rem;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--text-main);
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .signup-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <div class="org-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <path d="M9 22v-4h6v4"></path>
+                    <path d="M8 6h.01"></path>
+                    <path d="M16 6h.01"></path>
+                    <path d="M8 10h.01"></path>
+                    <path d="M16 10h.01"></path>
+                    <path d="M8 14h.01"></path>
+                    <path d="M16 14h.01"></path>
+                </svg>
+            </div>
+            <span class="org-name">Solapur Municipal Corporation</span>
+            <h1>Official Login</h1>
+            <p>Sign in to manage reports, assign work, and monitor repairs</p>
+        </div>
+
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <div class="form-label-row">
+                    <label class="form-label">Employee ID or Email</label>
+                </div>
+                <div class="input-container">
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" class="form-input" id="emailInput" required placeholder="Enter your official ID">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label-row">
+                    <label class="form-label">Password</label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+                <div class="input-container">
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" class="form-input password-input" id="passwordInput" required
+                        placeholder="Enter password">
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('passwordInput')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Login
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+        </form>
+
+        <div class="signup-link">
+            New Official? <a href="register.html">Create Account</a>
+        </div>
+
+        <div class="login-footer">
+            <div class="personnel-note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Authorized personnel only. Contact Admin for access.
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link-container">
+        <a href="/" class="back-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+    <script src="../shared/modal.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script>
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+            } else {
+                input.type = "password";
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+
+            try {
+                await Auth.login(email, password);
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                if (window.showModal) showModal('Login Failed', error.message);
+                else alert(error.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

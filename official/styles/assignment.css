@@ -1,0 +1,97 @@
+/* Assignment Screen Styles */
+
+.assignment-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.report-details-section,
+.assignment-form-section,
+.work-order-preview-section {
+    margin-bottom: 2rem;
+}
+
+.report-details-section h2,
+.assignment-form-section h2,
+.work-order-preview-section h2,
+.stat-card h2 {
+    margin-bottom: 1rem;
+    color: var(--text-dark, #1e293b);
+}
+
+.report-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.report-detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+    color: var(--text-main, #333);
+}
+
+.report-detail-row:last-child {
+    border-bottom: none;
+}
+
+.report-detail-row strong {
+    color: var(--primary, #0d6efd);
+    min-width: 150px;
+}
+
+.work-order-preview {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    white-space: pre-line;
+    color: var(--text-main, #1e293b);
+    border: 1px solid var(--border, #e2e8f0);
+}
+
+.work-order-preview strong {
+    color: var(--primary, #0d6efd);
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* Fix form labels specifically in assignment */
+.form-label {
+    color: var(--text-main, #1e293b) !important;
+}
+
+.stat-card,
+.stat-card2 {
+    background: var(--bg-card, #ffffff) !important;
+    color: var(--text-main, #1e293b);
+    border: 1px solid var(--border, #e2e8f0);
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    background: #f8fafc !important;
+    border: 1px solid var(--border, #e2e8f0) !important;
+    color: var(--text-main, #1e293b) !important;
+}
+
+.form-select option {
+    background: #ffffff;
+    color: var(--text-main, #1e293b);
+}

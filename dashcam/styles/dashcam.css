@@ -1,0 +1,425 @@
+/* =============================================================
+   Dashcam Preview - Modern & Polished Styling
+   ============================================================= */
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: radial-gradient(circle at top left, #f8fafc, #f1f5f9);
+    color: #1f2937;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+/* ── Top Bar (Shared Style Overrides) ───────────────────── */
+.top-bar {
+    padding: 0 1rem;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.top-bar__container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.menu-item.logout {
+    color: #dc2626;
+    border-top: 1px solid #f3f4f6;
+}
+
+.menu-item.logout:hover {
+    background: #fef2f2;
+}
+
+/* ── Page Layout ────────────────────────────────────────── */
+.page-wrapper {
+    flex: 1;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+}
+
+.page-header {
+    text-align: center;
+    margin: 3rem auto 2.5rem;
+    max-width: 600px;
+}
+
+.page-header__title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.025em;
+}
+
+.page-header__subtitle {
+    font-size: 1.1rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.report-form-container {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    padding: 2.5rem;
+    margin-top: 1.5rem;
+}
+
+/* ── Tabs ─────────────────────────────────────────────── */
+.tab-switcher {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    background: #f9fafb;
+    padding: 0.5rem;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #6b7280;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.tab-btn.active {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* ── Webcam Container ─────────────────────────────────── */
+.webcam-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #111827;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#webcamVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+#webcamPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+}
+
+.upload-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+/* ── Live Badge & Overlays ────────────────────────────── */
+.live-badge {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: rgba(239, 68, 68, 0.95);
+    color: #ffffff;
+    padding: 0.4rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background: #ffffff;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+.detection-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.detection-label {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    background: rgba(37, 99, 235, 0.95);
+    color: #ffffff;
+    padding: 0.6rem 1.1rem;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.detection-label.no-damage {
+    background: rgba(16, 185, 129, 0.95);
+}
+
+/* ── Stats Display ────────────────────────────────────── */
+.rt-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.rt-stat {
+    background: #ffffff;
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rt-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+    border-color: #2563eb;
+}
+
+.rt-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.35rem;
+}
+
+.rt-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* ── GPS Display ──────────────────────────────────────── */
+.info-display {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+/* ── Last Detection Card ──────────────────────────────── */
+#rtLastDetectionCard {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.08);
+    padding: 1.75rem;
+    border-radius: 20px;
+    margin-top: 2rem;
+}
+
+#rtLastDetectionCard h4 {
+    color: #111827;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#rtLastDetectionLabel {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 0.6rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+#rtLastDetectionImg {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Form Controls ────────────────────────────────────── */
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.75rem;
+}
+
+.form-textarea {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    resize: vertical;
+    background: #ffffff;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    background: #ffffff;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.75rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+#rtSubmitStatus {
+    text-align: center;
+    color: #10b981;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    display: none;
+    font-weight: 700;
+    padding: 0.75rem;
+    background: #ecfdf5;
+    border-radius: 8px;
+    border: 1px solid #a7f3d0;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .rt-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-header__title {
+        font-size: 1.75rem;
+    }
+    
+    .report-form-container {
+        padding: 1.5rem;
+    }
+}

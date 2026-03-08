@@ -1,25 +1,16 @@
-# Dependencies
-node_modules/
-venv/
-.venv/
+# Python cache
 __pycache__/
-*.py[cod]
-*.egg-info/
-.eggs/
+*.pyc
 
-# Build / output
-frontend/dist/
-backend/outputs/
-*.mp4
+# Database files
+*.db
 
-# Env
+# Uploads / temp images
+backend/uploads/
+
+# Environment
 .env
-.env.local
 
-# IDE
-.idea/
-.vscode/
-
-# OS
+# OS files
 .DS_Store
 Thumbs.db
