@@ -1,0 +1,366 @@
+/* Work Monitoring Screen Styles */
+
+.work-selector {
+    margin-bottom: 2rem;
+}
+
+.work-selector .form-label {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-dark, #1e293b);
+}
+
+.work-status-section,
+.photos-section,
+.logs-section {
+    margin-bottom: 2.5rem;
+}
+
+/* Neutralize the generic .stat-card styling on outer sections so inner cards display correctly */
+.work-status-section.stat-card,
+.photos-section.stat-card,
+.logs-section.stat-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.work-status-section.stat-card:hover,
+.photos-section.stat-card:hover,
+.logs-section.stat-card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.work-status-section h2,
+.photos-section h2,
+.logs-section h2 {
+    margin-bottom: 1.25rem;
+    color: var(--text-dark, #1e293b);
+    font-weight: 700;
+}
+
+.work-status-indicator {
+    background: var(--bg-card, #ffffff);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow, 0 8px 20px rgb(0 0 0 / 0.12));
+    border: 1px solid var(--border, #e2e8f0);
+    text-align: center;
+    color: var(--text-main, #334155);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.work-status-indicator:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 15px 30px rgba(0, 0, 0, 0.25);
+}
+
+.work-status-indicator p {
+    margin-bottom: 0.75rem;
+    font-size: 1.05rem;
+}
+
+.work-status-indicator p strong {
+    color: var(--text-dark, #1e293b);
+}
+
+/* Status Step matching Citizen UI */
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1rem 0 1.5rem 0;
+    background: var(--primary, #3b82f6);
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.status-badge.in-progress {
+    background: #eff6ff;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+    box-shadow: none;
+}
+
+.status-badge.completed {
+    background: #f0fdf4;
+    color: #22c55e;
+    border: 1px solid #22c55e;
+    box-shadow: none;
+}
+
+.status-badge.pending {
+    background: #fff7ed;
+    color: #f97316;
+    border: 1px solid #f97316;
+    box-shadow: none;
+}
+
+.photo-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.photo-card {
+    background: var(--bg-card, #ffffff);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow, 0 8px 20px rgb(0 0 0 / 0.12));
+    border: 1px solid var(--border, #e2e8f0);
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 15px 30px rgba(0, 0, 0, 0.25);
+}
+
+.photo-card h3 {
+    margin-bottom: 1.25rem;
+    color: var(--text-dark, #1e293b);
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+    padding-bottom: 0.75rem;
+}
+
+.comparison-photo {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border, #e2e8f0);
+}
+
+.logs-container {
+    background: var(--bg-card, #ffffff);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow, 0 8px 20px rgb(0 0 0 / 0.12));
+    border: 1px solid var(--border, #e2e8f0);
+}
+
+.log-entry {
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary, #3b82f6);
+    margin-bottom: 1rem;
+    background: var(--bg-main, #f8fafc);
+    border-radius: 0 8px 8px 0;
+    color: var(--text-main, #334155);
+    border: 1px solid var(--border, #e2e8f0);
+    border-left-width: 4px;
+}
+
+.log-entry:last-child {
+    margin-bottom: 0;
+}
+
+.log-entry-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dark, #1e293b);
+}
+
+.log-entry-details {
+    color: var(--text-main, #334155);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.monitoring-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 3rem 0;
+    flex-wrap: wrap;
+}
+
+.monitoring-actions .btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.works-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.work-card {
+    background: var(--bg-card, #ffffff);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow, 0 8px 20px rgb(0 0 0 / 0.12));
+    border: 1px solid var(--border, #e2e8f0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.work-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 15px 30px rgba(0, 0, 0, 0.25);
+    border-color: var(--primary, #3b82f6);
+}
+
+.work-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.work-card-title {
+    font-weight: 700;
+    color: var(--text-dark, #1e293b);
+    font-size: 1.1rem;
+}
+
+.work-card-meta {
+    color: var(--text-main, #334155);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.work-card-meta strong {
+    color: var(--text-dark, #1e293b);
+}
+
+@media (max-width: 968px) {
+    .photo-comparison {
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .photo-comparison {
+        grid-template-columns: 1fr;
+    }
+
+    .work-status-indicator,
+    .photo-card,
+    .logs-container {
+        padding: 1.25rem;
+    }
+
+    .monitoring-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .log-entry-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* ── Timeline ─────────────────────────────────────────────── */
+.status-timeline-section {
+    background: var(--bg-card, #ffffff);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    margin-bottom: 2.5rem;
+}
+
+.status-timeline-section h2 {
+    margin-bottom: 2rem;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-left: 0.5rem;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 1.25rem;
+    position: relative;
+    padding-bottom: 2.5rem;
+    align-items: flex-start;
+    z-index: 2;
+}
+
+/* Vertical line connecting dots */
+.timeline-item::after {
+    content: '';
+    position: absolute;
+    left: 13px;
+    /* Center of 28px dot */
+    top: 28px;
+    /* Start below the dot */
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+    z-index: 1;
+    display: block !important;
+    /* Override shared styles shield */
+}
+
+.timeline-item:last-child::after {
+    display: none !important;
+}
+
+/* Hide legacy timeline elements from shared/styles.css */
+.timeline-item::before {
+    display: none !important;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 3;
+    transition: all 0.3s ease;
+}
+
+.timeline-dot.completed-active {
+    background: #2563eb;
+}
+
+.timeline-content-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 2px;
+}
+
+.timeline-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.timeline-desc {
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 500;
+}

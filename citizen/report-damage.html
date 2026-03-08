@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Damage - Road Damage Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/common.css">
+    <link rel="stylesheet" href="styles/report-damage.css">
+</head>
+
+<body>
+    <!-- =========================================================
+         TOP BAR (with inline navigation)
+    ========================================================== -->
+    <header class="top-bar">
+        <div class="top-bar__left">
+            <div class="top-bar__brand">
+                <div class="top-bar__logo">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                        <rect x="2" y="6" width="5" height="16" rx="1.5" fill="#2563eb" />
+                        <rect x="10" y="2" width="5" height="20" rx="1.5" fill="#2563eb" opacity="0.7" />
+                        <rect x="18" y="9" width="5" height="13" rx="1.5" fill="#2563eb" opacity="0.5" />
+                    </svg>
+                </div>
+                                <span class="top-bar__title">SafeStreets</span>
+            </div>
+            <nav class="top-bar__nav" role="navigation" aria-label="Main navigation">
+                <a href="dashboard.html" class="top-nav-link" id="nav-dashboard">Dashboard</a>
+                <a href="report-damage.html" class="top-nav-link" id="nav-report">Report Damage</a>
+                <a href="map.html" class="top-nav-link" id="nav-map">Map</a>
+                <a href="dashcam.html" class="top-nav-link" id="nav-dashcam">Dashcam Preview</a>
+            </nav>
+            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation"
+                aria-expanded="false">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="top-bar__right">
+            <div class="top-bar__user-info">
+                <span class="top-bar__user-role">citizen</span>
+                <span class="top-bar__user-name" id="topBarUserName">John Doe</span>
+            </div>
+            <div class="profile-container">
+                <div class="top-bar__avatar" id="profileAvatar" onclick="toggleProfileMenu()" aria-label="Account menu"
+                    role="button" tabindex="0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </div>
+                <!-- Profile Dropdown -->
+                <div class="profile-menu" id="profileMenu" role="menu">
+                    <div class="menu-header">
+                        <span class="user-name">Loading...</span>
+                        <span class="user-role">Role</span>
+                    </div>
+                    <button class="menu-item logout" onclick="confirmLogout()" role="menuitem">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Removed (now inside header) -->
+
+    <!-- Main Content -->
+    <main class="page-wrapper">
+
+    <div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation">
+        <a href="dashboard.html" class="mobile-nav__link">Dashboard</a>
+        <a href="report-damage.html" class="mobile-nav__link">Report Damage</a>
+        <a href="map.html" class="mobile-nav__link">Map</a>
+        <a href="dashcam.html" class="mobile-nav__link">Dashcam Preview</a>
+    </div>
+    <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="toggleMobileNav()"></div>
+        <div class="page-header">
+            <div class="page-header__text">
+                <h1 class="page-header__title">Report New Damage</h1>
+                <p class="page-header__subtitle">Use your camera for real-time road damage detection.</p>
+            </div>
+        </div>
+        <div class="container">
+        <div class="report-form-container">
+
+            <!-- ===== TAB SWITCHER ===== -->
+            <div class="tab-switcher">
+                <button class="tab-btn active" id="tabRealtime" onclick="switchTab('realtime')">📹 Realtime
+                    Detection</button>
+            </div>
+
+            <!-- ===================================================
+                 TAB 3: REALTIME
+                 =================================================== -->
+            <div class="tab-panel active" id="panelRealtime">
+                <div class="upload-section">
+                    <!-- Webcam feed -->
+                    <div class="webcam-container" id="webcamContainer">
+                        <div id="webcamPlaceholder">
+                            <div class="upload-icon">📷</div>
+                            <p style="color:#6b7280;">Click "Start Detection" to begin</p>
+                        </div>
+                        <video id="webcamVideo" autoplay playsinline muted></video>
+
+                        <!-- Live badge -->
+                        <div class="live-badge" id="liveBadge">
+                            <div class="live-dot"></div> LIVE
+                        </div>
+
+                        <!-- Detection overlay -->
+                        <div class="detection-overlay" id="detectionOverlay"></div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="rt-stats">
+                        <div class="rt-stat">
+                            <div class="rt-value" id="rtTotal">0</div>
+                            <div class="rt-label">Total Detections</div>
+                        </div>
+                        <div class="rt-stat">
+                            <div class="rt-value" id="rtFrames">0</div>
+                            <div class="rt-label">Frames Sent</div>
+                        </div>
+                        <div class="rt-stat">
+                            <div class="rt-value" id="rtStatus" style="font-size:1rem;">Idle</div>
+                            <div class="rt-label">Status</div>
+                        </div>
+                    </div>
+
+                    <!-- GPS location display for realtime reports -->
+                    <div class="info-section" style="margin-top:1rem;">
+                        <div class="form-group">
+                            <label class="form-label">📍 GPS Location</label>
+                            <div class="info-display" id="rtLocationDisplay">Acquiring location...</div>
+                        </div>
+                    </div>
+
+                    <!-- Last detection card + submit button -->
+                    <div id="rtLastDetectionCard"
+                        style="display:none; margin-top:1rem; padding:1rem; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px;">
+                        <h4 style="margin-bottom:0.5rem;">📸 Last Detection</h4>
+                        <p id="rtLastDetectionLabel" style="color:#1d4ed8; margin-bottom:0.75rem;"></p>
+                        <img id="rtLastDetectionImg" alt="Last detected frame"
+                            style="width:100%; border-radius:8px; border:1px solid #bfdbfe; margin-bottom:0.75rem; display:none;">
+                        <div class="form-group">
+                            <label class="form-label">Description (Optional)</label>
+                            <textarea class="form-textarea" id="rtDescriptionInput"
+                                placeholder="Provide additional details..." rows="2"></textarea>
+                        </div>
+                        <button class="btn btn-primary" id="rtSubmitBtn" style="width:100%; margin-top:0.5rem;"
+                            onclick="submitRealtimeReport()">📤 Submit Report</button>
+                        <p id="rtSubmitStatus"
+                            style="text-align:center; color:#1d4ed8; font-size:0.85rem; margin-top:0.5rem; display:none;">
+                        </p>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="rt-controls">
+                        <button class="btn btn-primary" id="rtStartBtn" onclick="startRealtime()">▶️ Start
+                            Detection</button>
+                        <button class="btn btn-secondary" id="rtStopBtn" onclick="stopRealtime()"
+                            style="display:none;">⏹️ Stop</button>
+                        <button class="btn btn-secondary" id="rtSwitchBtn" onclick="switchCamera()"
+                            style="display:none;" title="Switch between front and back camera">🔄 Switch Camera</button>
+                    </div>
+
+                    <p style="color:#6b7280; font-size:0.85rem; margin-top:1rem;">
+                        💡 Frames are sent to the server every 1 second for analysis. Allow camera access when prompted.
+                    </p>
+                </div>
+            </div>
+
+        </div><!-- /report-form-container -->
+    </div><!-- /container -->
+    </main>
+
+    <!-- Scripts -->
+    <script src="../shared/navigation.js"></script>
+    <script src="../shared/modal.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="scripts/dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', initNavigation);
+        document.getElementById('profileAvatar').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleProfileMenu(); }
+        });
+    </script>
+
+    <script src="../shared/navigation.js"></script>
+    <script src="../shared/modal.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="scripts/report-damage.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', initNavigation);
+        document.getElementById('profileAvatar').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleProfileMenu(); }
+        });
+    </script>
+</body>
+
+</html>

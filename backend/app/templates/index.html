@@ -1,0 +1,1614 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafeStreets - Smart Road Management</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='shared/styles.css') }}"
+    />
+    <!-- Load Inter font for modern look -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --secondary: #f8fafc;
+        --text-dark: #0f172a;
+        --text-gray: #64748b;
+        --border-color: #e2e8f0;
+        --bg-light: #f1f5f9;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background-color: #f8fafc;
+        color: var(--text-dark);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      /* Navbar */
+      .navbar {
+        display: flex;
+        align-items: center;
+        padding: 1rem 10%;
+        background: #ffffff;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        gap: 1.5rem;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-right: auto;
+      }
+
+      .logo-icon-svg {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+      }
+
+      .logo-icon-svg div {
+        width: 6px;
+        background: #4f81ff;
+        border-radius: 4px;
+      }
+
+      .logo-icon-svg div:nth-child(1) {
+        height: 16px;
+        margin-bottom: 4px;
+      }
+
+      .logo-icon-svg div:nth-child(2) {
+        height: 24px;
+      }
+
+      .logo-icon-svg div:nth-child(3) {
+        height: 12px;
+        margin-bottom: 2px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: color 0.3s;
+      }
+
+      .nav-links a.active {
+        color: #4f81ff;
+        font-weight: 600;
+        background: rgba(79, 129, 255, 0.1);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+      }
+
+      .nav-links a:hover {
+        color: #4f81ff;
+      }
+
+      .btn-login {
+        background: #4f81ff;
+        color: white;
+        padding: 0.6rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 14px rgba(79, 129, 255, 0.3);
+      }
+
+      .btn-login:hover {
+        background: #3b6ae6;
+        transform: translateY(-2px);
+      }
+
+      /* Hero Section */
+      .hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5rem 10% 3rem;
+        background: #ffffff;
+        gap: 4rem;
+      }
+
+      .hero-content {
+        flex: 1;
+        max-width: 500px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1.25rem;
+        background: #ffffff;
+        color: #4f81ff;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+      }
+
+      .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        color: #4f81ff;
+        background: linear-gradient(90deg, #4f81ff 0%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+        color: #64748b;
+        margin-bottom: 2.5rem;
+        line-height: 1.7;
+      }
+
+      .btn-report {
+        background: #4f81ff;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 8px 16px -4px rgba(79, 129, 255, 0.4);
+        transition: all 0.3s;
+      }
+
+      .btn-report:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 20px -4px rgba(79, 129, 255, 0.5);
+      }
+
+      .hero-image {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+        position: relative;
+        /* width: 30em; */
+      }
+
+      /* Decorative blur blob */
+      .hero-image::before {
+        content: "";
+        position: absolute;
+        width: 80%;
+        height: 80%;
+        background: #4f81ff;
+        filter: blur(80px);
+        opacity: 0.15;
+        z-index: 0;
+        border-radius: 50%;
+      }
+
+      .mock-dashboard {
+        /* width: 30em; */
+        max-width: 100%;
+        background: #111827;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        z-index: 1;
+      }
+
+      .mock-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+
+      .mock-title {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+
+      .mock-live {
+        background: #22c55e;
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .mock-live::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        background: white;
+        border-radius: 50%;
+      }
+
+      .mock-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .mock-stat {
+        background: #1f2937;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .mock-stat-title {
+        color: #9ca3af;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .mock-stat-value {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .mock-chart {
+        background: #1f2937;
+        padding: 1rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: flex-end;
+        gap: 0.6rem;
+        height: 100px;
+        justify-content: space-between;
+      }
+
+      .chart-bar {
+        width: 100%;
+        background: #4f81ff;
+        border-radius: 4px;
+        opacity: 0.9;
+      }
+
+      /* Stats Bar */
+      .stats-section {
+        padding: 0 10% 4rem;
+        background: #ffffff;
+        position: relative;
+        z-index: 10;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 1.5rem 3rem;
+        gap: 2rem;
+      }
+
+      .stat-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .stat-icon {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        border-radius: 12px;
+        background: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+
+      .stat-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 90px;
+      }
+
+      .stat-info-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.2;
+      }
+
+      .stat-name {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 500;
+      }
+
+      /* Common Section Titles */
+      .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
+
+      .section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+
+      /* Adjust anchor offsets to account for sticky navbar */
+      section {
+        scroll-margin-top: 100px;
+      }
+
+      .section-desc {
+        color: var(--text-gray);
+        max-width: 600px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+      }
+
+      /* How it works */
+      .how-it-works {
+        padding: 6rem 5%;
+        background: white;
+      }
+
+      .steps-container {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .steps-container::before {
+        content: "";
+        position: absolute;
+        top: 40px;
+        left: 10%;
+        height: 2px;
+        width: 80%;
+        background: var(--border-color);
+        z-index: 1;
+      }
+
+      .step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        padding: 0 1rem;
+      }
+
+      .step-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: var(--primary);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s;
+      }
+
+      .step:hover .step-icon-wrapper {
+        border-color: var(--primary);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+      }
+
+      .step-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .step-desc {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+      }
+
+      /* Features */
+      .features {
+        padding: 6rem 5%;
+        background: #fafafa;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .feature-card {
+        background: white;
+        padding: 2.5rem 2rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s;
+      }
+
+      .feature-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        transform: translateY(-5px);
+        border-color: #cbd5e1;
+      }
+
+      .feature-icon {
+        width: 56px;
+        height: 56px;
+        background: #eff6ff;
+        color: var(--primary);
+        border-radius: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .feature-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+      }
+
+      .feature-desc {
+        font-size: 0.95rem;
+        color: var(--text-gray);
+        line-height: 1.5;
+      }
+
+      /* Roles Split */
+      .roles {
+        padding: 4rem 5% 6rem;
+        background: #fafafa;
+      }
+
+      .roles-container {
+        display: flex;
+        gap: 2rem;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .role-box {
+        flex: 1;
+        background: white;
+        padding: 3.5rem;
+        border-radius: 24px;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s;
+      }
+
+      .role-box:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+      }
+
+      .role-box-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .role-list {
+        list-style: none;
+        position: relative;
+        z-index: 1;
+      }
+
+      .role-list li {
+        position: relative;
+        padding-left: 2.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .role-list li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        top: 2px;
+        color: var(--primary);
+        font-weight: bold;
+        background: #eff6ff;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 0.8rem;
+      }
+
+      .role-list h4 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .role-list p {
+        font-size: 0.95rem;
+        color: var(--text-gray);
+      }
+
+      .role-bg-icon {
+        position: absolute;
+        right: -10%;
+        bottom: -10%;
+        font-size: 18rem;
+        color: var(--bg-light);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* CTA */
+      .cta {
+        padding: 5rem 5%;
+        margin: 0 5% 4rem;
+        background: var(--primary);
+        border-radius: 24px;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+
+      .cta h2 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .cta p {
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto 2rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+      }
+
+      .cta-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .cta .btn-outline {
+        background: transparent;
+        color: white;
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: none;
+      }
+
+      .cta .btn-outline:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: white;
+      }
+
+      .cta .btn-primary {
+        background: white;
+        color: var(--primary);
+      }
+
+      .cta .btn-primary:hover {
+        background: #f8fafc;
+      }
+
+      /* Footer */
+      .footer {
+        background: white;
+        padding: 4rem 5% 2rem;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 4rem;
+        margin-bottom: 3rem;
+      }
+
+      .footer-about p {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        max-width: 300px;
+      }
+
+      .footer-social {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .social-icon {
+        width: 36px;
+        height: 36px;
+        background: var(--bg-light);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-dark);
+        transition: all 0.3s;
+      }
+
+      .social-icon:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      .footer-links h4 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+      }
+
+      .footer-links ul {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: 0.75rem;
+      }
+
+      .footer-links a {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+        transition: color 0.3s;
+      }
+
+      .footer-links a:hover {
+        color: var(--primary);
+      }
+
+      .footer-contact li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        color: var(--text-gray);
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+      }
+
+      .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-gray);
+        font-size: 0.85rem;
+      }
+
+      .footer-bottom-links {
+        display: flex;
+        gap: 1.5rem;
+      }
+
+      .footer-bottom-links a {
+        color: var(--text-gray);
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal-content {
+        background: white;
+        width: 100em;
+        max-width: 500px;
+        border-radius: 24px;
+        padding: 2.5rem;
+        position: relative;
+        transform: scale(0.95) translateY(20px);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+
+      .modal-overlay.active .modal-content {
+        transform: scale(1) translateY(0);
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--bg-light);
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: var(--text-gray);
+        font-size: 1.25rem;
+        transition: all 0.2s;
+      }
+
+      .modal-close:hover {
+        background: #e2e8f0;
+        color: var(--text-dark);
+      }
+
+      .modal-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 2rem;
+        width: 100%;
+      }
+
+      .modal-header h3 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        width: 100%;
+      }
+
+      .modal-header p {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+        width: 100%;
+        margin: 0;
+      }
+
+      .login-options {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .login-card {
+        flex: 1;
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+
+      .login-card:hover {
+        border-color: var(--primary);
+        background: #f8fafc;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.05);
+      }
+
+      .login-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 1rem;
+        font-size: 1.75rem;
+      }
+
+      .citizen-icon {
+        background: #f3e8ff;
+        color: #9333ea;
+      }
+
+      .officer-icon {
+        background: #e0f2fe;
+        color: #0284c7;
+      }
+
+      .login-card h4 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .login-card p {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        line-height: 1.4;
+      }
+
+      /* Responsive */
+      .mobile-menu-btn {
+        display: none;
+        background: transparent;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: #0f172a;
+      }
+
+      @media (max-width: 1024px) {
+        .hero {
+          flex-direction: column;
+          text-align: center;
+          padding: 4rem 5% 3rem;
+        }
+
+        .hero-content {
+          margin: 0 auto;
+        }
+
+        .hero-buttons {
+          justify-content: center;
+        }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .features-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .roles-container {
+          flex-direction: column;
+        }
+
+        .footer-grid {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+
+        .how-it-works .steps-container::before {
+          display: none;
+        }
+
+        .steps-container {
+          flex-direction: column;
+          gap: 2rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .navbar {
+          padding: 1rem 5%;
+        }
+
+        .mobile-menu-btn {
+          display: block;
+          order: 1;
+        }
+
+        .logo-container {
+          order: 2;
+          margin-right: auto;
+        }
+
+        .nav-links {
+          display: none;
+          flex-direction: column;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: white;
+          padding: 1rem 5%;
+          border-bottom: 1px solid var(--border-color);
+          box-shadow: 0 10px 15px -10px rgba(0, 0, 0, 0.1);
+          gap: 1rem;
+          z-index: 99;
+        }
+
+        .btn-login {
+          order: 3;
+          padding: 0.5rem 1.2rem;
+          font-size: 0.85rem;
+        }
+
+        .nav-links.show {
+          display: flex;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+          padding: 1.5rem;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+          padding: 2rem 1.5rem;
+          width: 95%;
+        }
+
+        .login-options {
+          flex-direction: column;
+        }
+
+        .cta h2 {
+          font-size: 2rem;
+        }
+
+        .cta-buttons {
+          flex-direction: column;
+          width: 100%;
+          max-width: 300px;
+          margin: 0 auto;
+        }
+
+        .cta-buttons .btn {
+          width: 100%;
+        }
+
+        .hero h1 {
+          font-size: 2.2rem;
+        }
+
+        .hero p {
+          font-size: 1rem;
+        }
+
+        .login-options {
+          flex-direction: column;
+        }
+
+        .cta-buttons {
+          flex-direction: column;
+        }
+
+        .mock-stats {
+          grid-template-columns: 1fr;
+        }
+
+        .roles .role-box {
+          padding: 2.5rem 1.5rem;
+        }
+        .footer-bottom {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <button
+        class="mobile-menu-btn"
+        onclick="document.getElementById('navLinks').classList.toggle('show')"
+      >
+        ☰
+      </button>
+
+      <div class="logo-container">
+        <div class="logo-icon-svg">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+
+      <div class="nav-links" id="navLinks">
+        <a href="#home" class="active">Home</a>
+        <a href="#reports">Infrastructure Reports</a>
+        <a href="#about">About</a>
+        <a href="#safety">System Features</a>
+        <a href="#services">Services</a>
+      </div>
+
+      <button class="btn-login" onclick="openLoginModal()">Login</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <div class="badge">
+          <span style="color: #f59e0b">⚡</span> AI POWERED ROAD ANALYTICS
+        </div>
+        <h1>SafeStreets</h1>
+        <p>
+          Elevating Solapur's infrastructure with real-time AI pothole
+          detection, automated repair workflows, and comprehensive citizen
+          engagement.
+        </p>
+        <div class="hero-buttons">
+          <!-- Direct linking while keeping the button look -->
+          <button
+            class="btn-report"
+            onclick="window.location.href = '/citizen/login.html'"
+          >
+            🚧 Report Road Damage
+          </button>
+        </div>
+      </div>
+      <div class="hero-image">
+        <div class="mock-dashboard">
+          <div class="mock-header">
+            <div class="mock-title">Smart City</div>
+            <div class="mock-live">Live</div>
+          </div>
+          <div class="mock-stats">
+            <div class="mock-stat">
+              <div class="mock-stat-title">Reports Today</div>
+              <div class="mock-stat-value">
+                {{ total_reports if total_reports is defined else '24' }}
+              </div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-title">Repairs Active</div>
+              <div class="mock-stat-value">
+                {{ active_reports if active_reports is defined else '8' }}
+              </div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-title">Completed</div>
+              <div class="mock-stat-value">
+                {{ fixed_reports if fixed_reports is defined else '12' }}
+              </div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-title">Contractors</div>
+              <div class="mock-stat-value">
+                {{ contractors if contractors is defined else '3' }}
+              </div>
+            </div>
+          </div>
+          <div class="mock-chart">
+            <div class="chart-bar" style="height: 30%"></div>
+            <div class="chart-bar" style="height: 50%"></div>
+            <div class="chart-bar" style="height: 35%"></div>
+            <div class="chart-bar" style="height: 60%"></div>
+            <div class="chart-bar" style="height: 40%"></div>
+            <div class="chart-bar" style="height: 80%"></div>
+            <div class="chart-bar" style="height: 55%"></div>
+            <div class="chart-bar" style="height: 45%"></div>
+            <div class="chart-bar" style="height: 70%"></div>
+            <div class="chart-bar" style="height: 40%"></div>
+            <div class="chart-bar" style="height: 65%"></div>
+            <div class="chart-bar" style="height: 55%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section" id="reports">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: white; border-radius: 12px">
+            <img
+              src="{{ url_for('static', filename='images/total_reports_icon.png') }}"
+              onerror="
+                this.outerHTML =
+                  '<span style=\\\'font-size: 1.5rem;\\\'>📋</span>'
+              "
+              alt="Reports"
+              style="width: 24px; height: 24px"
+            />
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">
+              {{ total_reports if total_reports is defined else '5' }}
+            </div>
+            <div class="stat-name">Total Reports</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #e6f7ec; color: #22c55e">
+            <div
+              style="
+                background: #22c55e;
+                width: 18px;
+                height: 18px;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 0.8rem;
+                font-weight: bold;
+              "
+            >
+              ✓
+            </div>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">
+              {{ fixed_reports if fixed_reports is defined else '0' }}
+            </div>
+            <div class="stat-name">Fixed</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #fef3c7; color: #d97706">
+            <span
+              style="
+                font-size: 1.2rem;
+                transform: rotate(-45deg);
+                display: inline-block;
+              "
+              >🔧</span
+            >
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">
+              {{ active_reports if active_reports is defined else '5' }}
+            </div>
+            <div class="stat-name">Active Reports</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #ffedd5; color: #1e1b4b">
+            <span style="font-size: 1.2rem">👤</span>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">
+              {{ contractors if contractors is defined else '1' }}
+            </div>
+            <div class="stat-name">Contractors</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How the System Works -->
+    <section class="how-it-works" id="about">
+      <div class="section-header">
+        <h2 class="section-title">How the System Works</h2>
+        <p class="section-desc">
+          A seamless 4-step process from issue detection to final execution.
+        </p>
+      </div>
+      <div class="steps-container">
+        <div class="step">
+          <div class="step-icon-wrapper">📸</div>
+          <h3 class="step-title">1. Report</h3>
+          <p class="step-desc">
+            Citizens capture and upload photos of road damage with GPS tags.
+          </p>
+        </div>
+        <div class="step">
+          <div class="step-icon-wrapper">🧠</div>
+          <h3 class="step-title">2. AI Detection</h3>
+          <p class="step-desc">
+            Our AI instantly categorizes the severity and type of road damage.
+          </p>
+        </div>
+        <div class="step">
+          <div class="step-icon-wrapper">📋</div>
+          <h3 class="step-title">3. Verification</h3>
+          <p class="step-desc">
+            SMC officials verify reports and approve work orders for
+            contractors.
+          </p>
+        </div>
+        <div class="step">
+          <div class="step-icon-wrapper">🛠️</div>
+          <h3 class="step-title">4. Repair</h3>
+          <p class="step-desc">
+            Contractors complete repairs, and status is updated in real-time.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="safety">
+      <div class="section-header">
+        <div
+          class="badge"
+          style="
+            background: transparent;
+            color: var(--primary);
+            font-weight: 800;
+            letter-spacing: 1px;
+          "
+        >
+          ADVANCED CAPABILITIES
+        </div>
+        <h2 class="section-title">System Features</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🏠</div>
+          <h3 class="feature-title">AI Detection</h3>
+          <p class="feature-desc">
+            Automated visual analysis to identify pothole dimensions and depth
+            with high precision.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h3 class="feature-title">Real-Time Tracking</h3>
+          <p class="feature-desc">
+            Live dashboard for citizens and officials to track the status of
+            every reported issue.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📍</div>
+          <h3 class="feature-title">GPS Reporting</h3>
+          <p class="feature-desc">
+            Precise location tagging ensures maintenance crews find the exact
+            damage site instantly.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👷</div>
+          <h3 class="feature-title">Contractor Assignment</h3>
+          <p class="feature-desc">
+            Automated dispatch system for contractors based on location,
+            expertise, and workload.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👁️</div>
+          <h3 class="feature-title">Transparency</h3>
+          <p class="feature-desc">
+            Public-facing data on completion times and contractor performance
+            ratings.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📡</div>
+          <h3 class="feature-title">Smart Monitoring</h3>
+          <p class="feature-desc">
+            Continuous health monitoring of critical junctions and bridge
+            infrastructure.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Roles Container -->
+    <section class="roles" id="services">
+      <div class="roles-container">
+        <div class="role-box" style="padding-bottom: 3.5rem">
+          <h3 class="role-box-title" style="color: #0f172a">
+            <span style="color: #4f46e5">👤</span> For Citizens
+          </h3>
+          <ul class="role-list">
+            <li>
+              <h4 style="font-size: 0.95rem; color: #0f172a">Easy Reporting</h4>
+              <p style="font-size: 0.85rem">
+                Submit road reports using your phone camera with AI analysis.
+              </p>
+            </li>
+            <li>
+              <h4 style="font-size: 0.95rem; color: #0f172a">
+                Faster Response
+              </h4>
+              <p style="font-size: 0.85rem">
+                Automated workflows ensure response times drop up to 60%.
+              </p>
+            </li>
+            <li>
+              <h4 style="font-size: 0.95rem; color: #0f172a">
+                Community Engagement
+              </h4>
+              <p style="font-size: 0.85rem">
+                Track reports, view neighborhood health, and get notified on
+                repairs.
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="role-box" style="padding-bottom: 3.5rem">
+          <h3 class="role-box-title" style="color: #0f172a">
+            <span style="color: #3b82f6">🛡️</span> For Officials
+          </h3>
+          <ul class="role-list" style="--primary: #22c55e">
+            <li>
+              <h4 style="font-size: 0.95rem; color: #0f172a">
+                Centralized Management
+              </h4>
+              <p style="font-size: 0.85rem">
+                Access and manage all reports from a unified dashboard.
+              </p>
+            </li>
+            <li>
+              <h4 style="font-size: 0.95rem; color: #0f172a">
+                Data Driven Priorities
+              </h4>
+              <p style="font-size: 0.85rem">
+                AI-driven analytics to classify damage and resources more
+                efficiently.
+              </p>
+            </li>
+            <li>
+              <h4 style="font-size: 0.95rem; color: #0f172a">
+                Resource Optimization
+              </h4>
+              <p style="font-size: 0.85rem">
+                Smart contractor dispatch saves costs and delivers faster
+                repairs.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <h2>Help Improve Roads</h2>
+      <p>
+        Join your fellow citizens in reporting infrastructure issues and
+        building a smarter, safer city for everyone.
+      </p>
+      <div class="cta-buttons">
+        <a href="/citizen/login.html" class="btn btn-primary"
+          >Report Road Damage</a
+        >
+        <a
+          href="#"
+          class="btn btn-outline"
+          style="
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+          "
+          >Citizen Services</a
+        >
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="logo-container" style="margin-bottom: 1rem">
+            <div class="logo-icon">S</div>
+            <div class="logo-text">Municipal Corporation</div>
+          </div>
+          <p>
+            Driving technological innovation to maintain and improve city-wide
+            infrastructure for a better tomorrow.
+          </p>
+          <div class="footer-social">
+            <a href="#" class="social-icon">🔗</a>
+            <a href="#" class="social-icon">🌐</a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Report Issue</a></li>
+            <li><a href="/citizen/login.html">Citizen Login</a></li>
+            <li><a href="/official/login.html">Official Dashboard</a></li>
+            <li><a href="/dashcam/login.html">Official Dashboard</a></li>
+          </ul>
+        </div>
+        <div class="footer-links footer-contact">
+          <h4>Contact Us</h4>
+          <ul>
+            <li>📞 1800-410-0001</li>
+            <li>✉️ support@solapur.gov.in</li>
+            <li>📍 Municipal Bhavan, Solapur - 413001</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>
+          &copy; 2024 Municipal Corporation. Smart Infrastructure Management
+          System.
+        </div>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeLoginModal()">×</button>
+        <div class="modal-header">
+          <h3>Choose Your Role</h3>
+          <p>Select how you'd like to sign in</p>
+        </div>
+        <div class="login-options">
+          <a href="/citizen/login.html" class="login-card">
+            <div class="login-icon citizen-icon">👤</div>
+            <h4>Citizen</h4>
+            <p>Report issues & track repairs</p>
+          </a>
+          <a href="/official/login.html" class="login-card">
+            <div class="login-icon officer-icon">🛡️</div>
+            <h4>Officer</h4>
+            <p>Manage reports & assign work</p>
+          </a>
+          <a href="/dashcam/login.html" class="login-card">
+            <div class="login-icon citizen-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <!-- Background circle (like other icons) -->
+                <circle cx="50" cy="50" r="38" fill="#E8DDF5" />
+
+                <!-- Car body -->
+                <path
+                  d="
+                        M28 55
+                        L38 45
+                        L60 45
+                        L70 52
+                        L72 55
+                        L72 60
+                        L28 60
+                        Z"
+                  fill="#E53935"
+                />
+
+                <!-- Car roof -->
+                <path
+                  d="
+                        M40 45
+                        L46 40
+                        L58 40
+                        L63 45
+                        Z"
+                  fill="#E53935"
+                />
+
+                <!-- Windows -->
+                <rect
+                  x="47"
+                  y="41"
+                  width="10"
+                  height="4"
+                  rx="1"
+                  fill="#BBDEFB"
+                />
+
+                <!-- Wheels -->
+                <circle cx="36" cy="60" r="4" fill="#222" />
+                <circle cx="64" cy="60" r="4" fill="#222" />
+              </svg>
+            </div>
+            <h4>DashCam</h4>
+            <p>Reports and Tracks Your Path while you Drive</p>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      function openLoginModal() {
+        document.getElementById("loginModal").classList.add("active");
+        document.body.style.overflow = "hidden"; // Prevent scrolling underneath
+      }
+
+      function closeLoginModal() {
+        document.getElementById("loginModal").classList.remove("active");
+        document.body.style.overflow = "";
+      }
+
+      // Close modal when clicking outside
+      document
+        .getElementById("loginModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeLoginModal();
+          }
+        });
+      // Dynamic navbar active state
+      var navLinks = document.querySelectorAll(".nav-links a");
+      navLinks.forEach(function (link) {
+        link.addEventListener("click", function () {
+          navLinks.forEach(function (l) {
+            l.classList.remove("active");
+          });
+          this.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

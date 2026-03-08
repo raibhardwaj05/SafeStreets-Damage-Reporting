@@ -1,0 +1,293 @@
+/* =============================================================
+   Citizen Common Styles – Shared Top Bar & Navigation
+   ============================================================= */
+
+/* ── Top Bar (inline nav) ────────────────────────────────── */
+.top-bar {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 1.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.top-bar__left {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.top-bar__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.top-bar__logo {
+    display: flex;
+    align-items: center;
+}
+
+.top-bar__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+.top-bar__nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.top-nav-link {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #6b7280;
+    border-radius: 5px;
+    transition: color 0.15s, background 0.15s;
+    white-space: nowrap;
+}
+
+.top-nav-link:hover {
+    color: #111827;
+    background: #f3f4f6;
+}
+
+.top-nav-link.active {
+    color: #2563eb;
+    font-weight: 600;
+    border-bottom: 2px solid #2563eb;
+    border-radius: 0;
+    padding-bottom: 0.3rem;
+}
+
+.top-bar__right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.top-bar__user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.2;
+}
+
+.top-bar__user-role {
+    font-size: 0.65rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.top-bar__user-name {
+    font-size: 0.78rem;
+    color: #111827;
+    font-weight: 600;
+}
+
+.top-bar__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    border: 2px solid #2563eb;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.top-bar__avatar:hover {
+    background: #1d4ed8;
+    transform: scale(1.05);
+}
+
+/* Profile Dropdown */
+.profile-container {
+    position: relative;
+    user-select: none;
+}
+
+.profile-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    width: 200px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+    animation: menuFadeIn 0.18s ease;
+}
+
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-menu.active {
+    display: flex;
+}
+
+.menu-header {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: #f9fafb;
+}
+
+.menu-header .user-name {
+    display: block;
+    font-weight: 600;
+    color: #111827;
+    font-size: 0.875rem;
+}
+
+.menu-header .user-role {
+    display: block;
+    font-size: 0.72rem;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 1px;
+}
+
+.menu-item {
+    padding: 0.75rem 1rem;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: background 0.15s;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: #f3f4f6;
+}
+
+/* ── Hamburger Button ─────────────────────────────────────── */
+.hamburger-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.hamburger-btn:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+@media (max-width: 1024px) {
+    .hamburger-btn {
+        display: flex;
+    }
+    
+    .top-bar__nav {
+        display: none; /* Hide top nav on mobile, use drawer */
+    }
+}
+
+/* ── Mobile Nav Drawer ────────────────────────────────────── */
+.mobile-nav {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 220px;
+    height: calc(100vh - 56px);
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+}
+
+.mobile-nav.active {
+    transform: translateX(0);
+}
+
+.mobile-nav__link {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: background 0.15s, color 0.15s;
+}
+
+.mobile-nav__link:hover {
+    background: #f9fafb;
+    color: #2563eb;
+}
+
+.mobile-nav__link.active {
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 600;
+    border-right: 3px solid #2563eb;
+}
+
+.mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 399;
+    backdrop-filter: blur(2px);
+}
+
+.mobile-nav-overlay.active {
+    display: block;
+}

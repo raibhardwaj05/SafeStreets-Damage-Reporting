@@ -1,0 +1,12 @@
+flask==3.0.0
+flask-sqlalchemy
+flask-migrate
+flask-jwt-extended
+flask-restful
+flask-cors
+psycopg2-binary
+python-dotenv
+ultralytics
+opencv-python-headless
+Werkzeug
+pdfplumber

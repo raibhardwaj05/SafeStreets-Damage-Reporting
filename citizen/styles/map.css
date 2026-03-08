@@ -1,0 +1,156 @@
+/* =============================================================
+   Citizen Map Page – Coverage Map
+   ============================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: #f3f4f8;
+    color: #1f2937;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.page-wrapper {
+    flex: 1;
+    max-width: 1440px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 2rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.page-header__title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.page-header__subtitle {
+    margin-top: 0.2rem;
+    font-size: 0.82rem;
+    color: #6b7280;
+}
+
+.map-page-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.25rem;
+    align-items: flex-start;
+}
+
+.map-side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.map-coords-card {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: #6b7280;
+    padding: 0.65rem 1rem;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.map-helper-text {
+    font-size: 0.8rem;
+    color: #6b7280;
+    background: #eef2ff;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+}
+
+.map-main-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    min-height: 420px;
+}
+
+.map-card-header {
+    padding: 1rem 1.25rem 0.5rem;
+}
+
+.map-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.map-card-subtitle {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.map-container {
+    padding: 0.75rem 1.25rem 1.25rem;
+}
+
+#leafletMap {
+    width: 100%;
+    height: 420px;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+@media (max-width: 1024px) {
+    .map-page-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .page-wrapper {
+        padding: 1rem 0.85rem 1.5rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #leafletMap {
+        height: 360px;
+    }
+}
+

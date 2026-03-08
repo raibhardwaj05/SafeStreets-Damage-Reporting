@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Contractor - Safe Streets</title>
+    <link rel="stylesheet" href="../shared/styles.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .container {
+            padding-top: 1rem;
+        }
+
+        .form-label {
+            color: var(--text-main, #1e293b) !important;
+        }
+
+        .form-select {
+            background: #f8fafc !important;
+            border: 1px solid var(--border, #e2e8f0) !important;
+            color: var(--text-main, #1e293b) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Bar / Header -->
+    <header class="header">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 11V1m16 10V1M12 23V1M4 23v-7m16 7v-7" />
+                </svg>
+            </div>
+            <span class="logo-text">SafeStreets <span class="accent">Officer</span></span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="work-reports.html" class="nav-item">Reports</a>
+            <a href="analytics.html" class="nav-item">Analytics</a>
+        </nav>
+
+        <div class="header-right">
+            <button class="icon-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+            </button>
+            <div class="profile-section" onclick="toggleProfileMenu()">
+                <div class="profile-info">
+                    <span class="profile-name user-name">Officer Jenkins</span>
+                    <span class="profile-role user-role">District 4 Admin</span>
+                </div>
+                <div class="profile-avatar">
+                    <img id="headerAvatar"
+                        src="https://ui-avatars.com/api/?name=Officer+Jenkins&background=f1f5f9&color=64748b"
+                        alt="Avatar">
+                </div>
+                <!-- Profile Menu (Hidden) -->
+                <div class="profile-menu" id="profileMenu">
+                    <button class="menu-item logout" onclick="confirmLogout()">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="form-container">
+            <h2 class="form-title">Contractor Details</h2>
+            <form id="addContractorForm">
+                <div class="form-group">
+                    <label class="form-label">Contractor Name</label>
+                    <input type="text" id="contractorName" class="form-select" placeholder="e.g. ABC Road Works"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Specialization</label>
+                    <input type="text" id="specialization" class="form-select" placeholder="e.g. Potholes, Resurfacing">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Info</label>
+                    <input type="text" id="contact" class="form-select" placeholder="Email or Phone">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Add Contractor</button>
+                    <button type="button" class="btn btn-secondary" style="flex: 1;"
+                        onclick="window.history.back()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../shared/navigation.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="../shared/modal.js"></script>
+    <script src="scripts/add-contractor.js"></script>
+</body>
+
+</html>

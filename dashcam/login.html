@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DashCam - Road Damage Detection Login</title>
+
+    <link rel="stylesheet" href="../shared/styles.css" />
+
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #f8fafc;
+        font-family: "Inter", sans-serif;
+      }
+
+      .login-card {
+        background: #ffffff;
+        padding: 3rem 2.5rem;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+      }
+
+      .login-icon-top {
+        width: 50px;
+        height: 50px;
+        background: #eff6ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .login-subtitle {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      .login-header h1 {
+        color: #0f172a;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+      }
+
+      .login-header p {
+        color: #64748b;
+        font-size: 0.95rem;
+      }
+
+      .form-label {
+        color: #0f172a;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      .form-input {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #0f172a;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        width: 100%;
+        font-size: 0.95rem;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .btn-primary {
+        background: #3b82f6;
+        color: white;
+        padding: 0.9rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 1.5rem;
+      }
+
+      .btn-primary:hover {
+        background: #2563eb;
+      }
+
+      .bottom-links {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+      }
+
+      .bottom-links p {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+
+      .bottom-links a {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="login-card">
+      <div class="login-icon-top">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+          <!-- Background circle (like other icons) -->
+          <circle cx="50" cy="50" r="38" fill="#E8DDF5" />
+
+          <!-- Car body -->
+          <path
+            d="
+                M28 55
+                L38 45
+                L60 45
+                L70 52
+                L72 55
+                L72 60
+                L28 60
+                Z"
+            fill="#E53935"
+          />
+
+          <!-- Car roof -->
+          <path
+            d="
+                M40 45
+                L46 40
+                L58 40
+                L63 45
+                Z"
+            fill="#E53935"
+          />
+
+          <!-- Windows -->
+          <rect x="47" y="41" width="10" height="4" rx="1" fill="#BBDEFB" />
+
+          <!-- Wheels -->
+          <circle cx="36" cy="60" r="4" fill="#222" />
+          <circle cx="64" cy="60" r="4" fill="#222" />
+        </svg>
+      </div>
+
+      <div class="login-header">
+        <span class="login-subtitle">Solapur Municipal Corporation</span>
+        <h1>DashCam</h1>
+        <p>Sign in to start reporting road damage</p>
+      </div>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group" style="margin-bottom: 1.25rem">
+          <label class="form-label">DashCam Device Code</label>
+
+          <input
+            id="deviceCodeInput"
+            type="text"
+            class="form-input"
+            required
+            placeholder="DC-MH01AB1234"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Continue</button>
+      </form>
+
+      <div class="bottom-links">
+        <p>Got a New DashCam? <a href="register.html">Add new device</a></p>
+
+        <a href="/" class="back-link">← Back to Home</a>
+      </div>
+    </div>
+
+    <script src="../shared/modal.js"></script>
+    <script src="./scripts/auth.js"></script>
+
+    <script>
+      async function handleLogin(e) {
+        e.preventDefault();
+
+        let deviceCode = document
+          .getElementById("deviceCodeInput")
+          .value.toUpperCase()
+          .trim();
+
+        try {
+          await Auth.login(deviceCode);
+
+          window.location.href = "dashcam.html";
+        } catch (error) {
+          if (window.showModal)
+            showModal("Login Failed", error.message, "error");
+          else alert(error.message);
+        }
+      }
+    </script>
+  </body>
+</html>

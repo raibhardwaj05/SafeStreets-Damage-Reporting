@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assign Work Order - Road Damage Detection</title>
+
+    <link rel="stylesheet" href="../shared/styles.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="stylesheet" href="styles/assignment.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 11V1m16 10V1M12 23V1M4 23v-7m16 7v-7" />
+                </svg>
+            </div>
+            <span class="logo-text">SafeStreets</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="work-reports.html" class="nav-item">Reports</a>
+            <a href="analytics.html" class="nav-item">Analytics</a>
+        </nav>
+
+        <div class="header-right">
+            <button class="icon-btn">
+                <!-- <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg> -->
+            </button>
+            <div class="profile-section" onclick="toggleProfileMenu()">
+                <div class="profile-info">
+                    <span class="profile-name user-name">Officer Jenkins</span>
+                    <span class="profile-role user-role">District 4 Admin</span>
+                </div>
+                <div class="profile-avatar">
+                    <img id="headerAvatar"
+                        src="https://ui-avatars.com/api/?name=Officer+Jenkins&background=f1f5f9&color=64748b"
+                        alt="Avatar">
+                </div>
+                <!-- Profile Menu (Hidden) -->
+                <div class="profile-menu" id="profileMenu">
+                    <button class="menu-item logout" onclick="confirmLogout()">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Assignment Detail (Shown when ID provided) -->
+        <div id="assignmentDetail" class="assignment-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1>Assign Work</h1>
+                <button class="btn btn-secondary btn-sm" onclick="window.location.href='assignment.html'">Back to
+                    Dashboard</button>
+            </div>
+
+            <!-- Report Details -->
+            <div class="report-details-section">
+                <h2>Approved Report Details</h2>
+                <div class="stat-card">
+                    <div id="reportDetails"></div>
+                </div>
+            </div>
+
+            <!-- Assignment Form -->
+            <div class="assignment-form-section" >
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>Assign Contractor</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-success btn-sm" onclick="window.location.href='add-contractor.html'">Add
+                            New Contractor</button>
+                        <button id="toggleDeleteBtn" class="btn btn-danger btn-sm" onclick="toggleDeleteMode()">Delete
+                            Contractor</button>
+                    </div>
+                </div>
+                <div class="stat-card">
+
+                    <div class="form-group">
+                        <label class="form-label">Select Contractor</label>
+                        <select class="form-select" id="contractorSelect">
+                            <option value="">-- Select Contractor --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" id="prioritySelect">
+                            <option value="NORMAL">Normal</option>
+                            <option value="HIGH">High</option>
+                            <option value="URGENT">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Expected Completion Date</label>
+                        <input type="date" class="form-input" id="completionDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Special Instructions</label>
+                        <textarea id="instructionsInput" class="form-textarea" rows="3"
+                            placeholder="Optional instructions for contractor..."></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Work Order Preview -->
+            <div class="stat-card">
+                <h2>Work Order Preview</h2>
+                <div class="stat-card2">
+                    <pre id="workOrderPreview" class="work-order-preview"></pre>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="assignment-actions">
+                <button class="btn btn-primary btn-large" onclick="assignWork()">
+                    Assign Work Order
+                </button>
+                <button class="btn btn-secondary" onclick="cancelAssignment()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="../shared/navigation.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="../shared/modal.js"></script>
+    <script src="scripts/assignment.js"></script>
+
+</body>
+
+</html>
