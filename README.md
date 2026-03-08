@@ -4,7 +4,6 @@
 ![Flask](https://img.shields.io/badge/Framework-Flask-black)
 ![YOLO](https://img.shields.io/badge/AI-YOLOv8-red)
 ![OpenCV](https://img.shields.io/badge/ComputerVision-OpenCV-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
 
 SafeStreets is an *AI-powered road infrastructure monitoring platform* designed to detect, report, and manage road damage efficiently.
 
