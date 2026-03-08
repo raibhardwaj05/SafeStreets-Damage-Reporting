@@ -11,5 +11,3 @@ opencv-python-headless
 Werkzeug
 pdfplumber
 gunicorn
-numpy
-pillow
