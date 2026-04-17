@@ -404,6 +404,42 @@ function renderDetailView(report) {
         beforePlaceholder.style.display = '';
     }
 
+    // Load after repair image
+    const afterImg = document.getElementById('afterRepairImg');
+    const afterPlaceholder = document.getElementById('afterPlaceholder');
+    const afterImageUrl = report.after_image_url;
+    
+    if (afterImg && afterPlaceholder) {
+        if (afterImageUrl) {
+            if (blobImageCache[afterImageUrl]) {
+                afterImg.src = blobImageCache[afterImageUrl];
+                afterImg.style.display = 'block';
+                afterPlaceholder.style.display = 'none';
+            } else {
+                afterPlaceholder.querySelector('span').textContent = 'Loading image...';
+                afterPlaceholder.style.display = '';
+                afterImg.style.display = 'none';
+                
+                Auth.fetchWithAuth(afterImageUrl).then(res => {
+                    if (res.ok) return res.blob();
+                    throw new Error('Failed');
+                }).then(blob => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    blobImageCache[afterImageUrl] = blobUrl;
+                    afterImg.src = blobUrl;
+                    afterImg.style.display = 'block';
+                    afterPlaceholder.style.display = 'none';
+                }).catch(() => {
+                    afterPlaceholder.querySelector('span').textContent = 'Image not available';
+                });
+            }
+        } else {
+            afterImg.style.display = 'none';
+            afterPlaceholder.querySelector('span').textContent = report.status === 'resolved' ? 'No image provided' : 'Repairing in progress';
+            afterPlaceholder.style.display = '';
+        }
+    }
+
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }

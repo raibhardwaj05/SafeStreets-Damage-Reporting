@@ -1109,9 +1109,6 @@ button {
         display: none;
     }
 
-    .top-bar__user-info {
-        display: none;
-    }
 
     .stats-map-row {
         grid-template-columns: 1fr 1fr;

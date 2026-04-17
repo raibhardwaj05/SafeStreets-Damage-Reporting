@@ -24,6 +24,7 @@ def register_device():
 
     vehicle_no = data.get("vehicle_no", "").strip().upper()
     device_id = data.get("device_id", "").strip().upper()
+    email = data.get("email", "").strip().lower()
 
     if not vehicle_no or not device_id:
         return jsonify({"msg": "Vehicle number and device id required"}), 400
@@ -40,7 +41,8 @@ def register_device():
 
         device = Device(
             vehicle_no=vehicle_no,
-            device_id=device_id
+            device_id=device_id,
+            email=email if email else None
         )
 
         db.session.add(device)
@@ -91,7 +93,8 @@ def device_login():
     return jsonify({
         "token": access_token,
         "device_id": device.device_id,
-        "vehicle_no": device.vehicle_no
+        "vehicle_no": device.vehicle_no,
+        "email": device.email or ""
     }), 200
 
 

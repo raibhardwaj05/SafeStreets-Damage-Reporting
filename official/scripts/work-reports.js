@@ -135,7 +135,17 @@ function clearFilters() {
 // NAVIGATION (CRITICAL FIX)
 // =====================================================
 function goToVerification(reportId) {
-    window.location.href = `verification.html?id=${reportId}`;
+    const report = workReports.find(r => r.id === reportId);
+    let isDashcam = false;
+    if (report) {
+        if (report.report_source === 'dashcam') {
+            isDashcam = true;
+        } else if (report.image_url && report.image_url.includes('dashcam_first_')) {
+            isDashcam = true;
+        }
+    }
+    const page = isDashcam ? 'dashcam-verification.html' : 'verification.html';
+    window.location.href = `${page}?id=${reportId}`;
 }
 
 // =====================================================

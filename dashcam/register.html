@@ -200,6 +200,18 @@
           </div>
         </div>
 
+        <div class="form-group" style="margin-bottom: 1.25rem">
+          <label class="form-label">Email Address</label>
+
+          <input
+            type="email"
+            class="form-input"
+            id="emailInput"
+            required
+            placeholder="driver@example.com"
+          />
+        </div>
+
         <button type="submit" class="btn btn-primary">Add Device</button>
       </form>
 
@@ -229,10 +241,14 @@
           .value.toUpperCase()
           .replace(/\s/g, "");
 
+        const email = document
+          .getElementById("emailInput")
+          .value.trim();
+
         const deviceId = "DC-" + vehicleNo;
 
         try {
-          await Auth.register(vehicleNo, deviceId);
+          await Auth.register(vehicleNo, deviceId, email);
 
           if (window.showModal) {
             showModal(

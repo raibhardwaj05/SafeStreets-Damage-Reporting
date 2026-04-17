@@ -932,7 +932,7 @@ button {
 
 /* ── Hamburger Button ─────────────────────────────────────── */
 .hamburger-btn {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     width: 36px;
@@ -945,6 +945,13 @@ button {
     transition: background 0.15s, color 0.15s;
     flex-shrink: 0;
 }
+
+@media (max-width: 1024px) {
+    .hamburger-btn {
+        display: flex;
+    }
+}
+
 
 .hamburger-btn:hover {
     background: #f3f4f6;
@@ -1359,8 +1366,15 @@ button {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
 }
 
 /* Detection overlay label */

@@ -34,11 +34,31 @@ def get_file(file_type, filename):
     # CITIZEN ACCESS (OWN FILES ONLY)
     # ---------------------------
     if role == 'citizen':
-        report = DamageReport.query.filter_by(image_path=filename).first()
+        report = DamageReport.query.filter(
+            (DamageReport.image_path == filename) |
+            (DamageReport.after_image_path == filename) |
+            (DamageReport.after_image_path_last == filename)
+        ).first()
 
         if report and report.citizen_id == user_id:
             return send_from_directory(directory, filename)
 
+        return jsonify({"msg": "Access denied"}), 403
+
+    # ---------------------------
+    # DASHCAM/DEVICE ACCESS (NO ROLE CLAIM)
+    # ---------------------------
+    if role is None:
+        report = DamageReport.query.filter(
+            (DamageReport.image_path == filename) |
+            (DamageReport.after_image_path == filename) |
+            (DamageReport.after_image_path_last == filename)
+        ).first()
+        
+        # Dashcam reports store device_id in citizen_id column right now
+        if report and report.citizen_id == user_id:
+            return send_from_directory(directory, filename)
+            
         return jsonify({"msg": "Access denied"}), 403
 
     return jsonify({"msg": "Unauthorized"}), 403

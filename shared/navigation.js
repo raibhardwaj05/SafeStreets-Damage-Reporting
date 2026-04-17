@@ -4,7 +4,14 @@
  * Initialize navigation highlighting based on current page
  */
 function initNavigation() {
-    const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+    let currentPage = window.location.pathname.split('/').pop();
+    if (!currentPage) {
+        if (window.location.pathname.includes('/dashcam')) {
+            currentPage = 'dashcam.html';
+        } else {
+            currentPage = 'dashboard.html';
+        }
+    }
     const navLinks = document.querySelectorAll('.nav-link, .nav-item, .top-nav-link, .mobile-nav__link');
 
     navLinks.forEach(link => {

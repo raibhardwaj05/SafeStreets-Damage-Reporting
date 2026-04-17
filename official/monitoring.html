@@ -95,7 +95,42 @@
                     </div>
                     <div class="photo-card stat-card">
                         <h3>After</h3>
-                        <img id="afterPhoto" class="comparison-photo" alt="After repair">
+                        <div class="after-photo-container">
+                            <img id="afterPhoto" class="comparison-photo" alt="After repair">
+                            <div class="upload-overlay">
+                                <button class="upload-btn" onclick="document.getElementById('afterImageUpload').click()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                    </svg>
+                                    Upload Image
+                                </button>
+                                <input type="file" id="afterImageUpload" accept="image/*" style="display: none;" onchange="handleAfterImageUpload(event)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Completion Section -->
+            <div class="completion-section stat-card">
+                <h2>Report Completion</h2>
+                <div class="completion-card stat-card">
+                    <div class="form-group">
+                        <label class="checkbox-container disabled" id="checkboxWrapper">
+                            <input type="checkbox" id="completionCheckbox" disabled onchange="toggleSubmitButton()">
+                            <span class="checkmark"></span>
+                            I confirm that the report is completed and the issue is solved.
+                        </label>
+                        <p class="helper-text" id="uploadHelperText" style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">Please upload the After image to enable verification.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="completionDescription">Work Summary / Description</label>
+                        <textarea id="completionDescription" placeholder="Provide a brief description of the work done..."></textarea>
+                    </div>
+                    <div class="completion-actions">
+                        <button id="submitReportBtn" class="btn btn-primary btn-large" disabled onclick="submitFinalReport()">
+                            Submit Report
+                        </button>
                     </div>
                 </div>
             </div>
@@ -132,6 +167,7 @@
     <script src="../shared/navigation.js"></script>
     <script src="../shared/modal.js"></script>
     <script src="../shared/auth.js"></script>
+    <script src="scripts/storage-helper.js"></script>
     <script src="scripts/monitoring.js"></script>
 </body>
 

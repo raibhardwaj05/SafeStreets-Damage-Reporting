@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request, current_app, send_file
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from werkzeug.utils import secure_filename
-from app.models import DamageReport
+from app.models import DamageReport, User
 from app import db
 from app.utils import log_audit
-from app.ml_utils import detect_damage, detect_damage_with_image
+from app.ml_utils import detect_damage, detect_damage_with_image, calculate_severity
 import os
 import cv2
 import numpy as np
@@ -56,7 +56,7 @@ def detect_only():
     path = os.path.join(temp_dir, filename)
     file.save(path)
 
-    damage, confidence, annotated_b64 = detect_damage_with_image(path)
+    damage, confidence, area, count, annotated_b64 = detect_damage_with_image(path)
 
     return jsonify({
         "damage_type": damage,
@@ -65,10 +65,6 @@ def detect_only():
     }), 200
 
 
-# =====================================================
-# 📹 REALTIME FRAME DETECT (POLLING)
-# =====================================================
-@citizen_bp.route('/detect-frame', methods=['POST'])
 # =====================================================
 # 📹 REALTIME FRAME DETECT (ULTRA FAST)
 # =====================================================
@@ -115,7 +111,7 @@ def detect_frame():
         # FAST DETECTION
         # --------------------------------------------------
 
-        damage, confidence, annotated_b64 = detect_damage_with_image(frame)
+        damage, confidence, area, count, annotated_b64 = detect_damage_with_image(frame)
 
         detected = damage not in (
             "No Damage",
@@ -126,15 +122,62 @@ def detect_frame():
         # --------------------------------------------------
         # Only send annotated image when damage detected
         # --------------------------------------------------
-
         if not detected:
             annotated_b64 = None
+
+        report_id = None
+        if detected and data.get("auto_save"):
+            user_id = get_jwt_identity()
+            user = User.query.get(user_id)
+            user_email = user.email if user else None
+
+            image_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'images')
+            os.makedirs(image_dir, exist_ok=True)
+            img_filename = f"rt_submit_{user_id}_{int(time.time()*1000)}.jpg"
+
+            if annotated_b64:
+                try:
+                    raw = annotated_b64.split(',')[1] if ',' in annotated_b64 else annotated_b64
+                    img_bytes = base64.b64decode(raw)
+                    nparr = np.frombuffer(img_bytes, np.uint8)
+                    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    if img is not None:
+                        cv2.imwrite(os.path.join(image_dir, img_filename), img)
+                    else:
+                        img_filename = "REALTIME_NO_IMAGE"
+                except Exception as e:
+                    current_app.logger.warning(f"Could not save realtime image: {e}")
+                    img_filename = "REALTIME_NO_IMAGE"
+            else:
+                img_filename = "REALTIME_NO_IMAGE"
+
+            severity = calculate_severity(confidence, area, count)
+
+            report = DamageReport(
+                citizen_id=user_id,
+                user_email=user_email,
+                device_id=None,
+                report_source="citizen",
+                image_path=img_filename,
+                location=data.get('location', ''),
+                latitude=data.get('latitude'),
+                longitude=data.get('longitude'),
+                detected_damage_type=damage,
+                confidence_score=round(float(confidence), 3),
+                severity=severity,
+                status="submitted"
+            )
+            db.session.add(report)
+            db.session.commit()
+            log_audit(user_id, f"SUBMIT_REALTIME_REPORT {report.id}")
+            report_id = report.id
 
         return jsonify({
             "damage_type": damage,
             "confidence": round(float(confidence), 3),
             "detected": detected,
-            "annotated_image": annotated_b64
+            "annotated_image": annotated_b64,
+            "report_id": report_id
         }), 200
 
     except Exception as e:
@@ -288,6 +331,7 @@ def detect_frame():
 # 📤 SUBMIT REALTIME FRAME REPORT (manual submit)
 # =====================================================
 @citizen_bp.route('/submit-realtime-frame', methods=['POST'])
+@jwt_required()
 def submit_realtime_frame():
     """
     Saves a damage report from a realtime detection frame.
@@ -296,6 +340,8 @@ def submit_realtime_frame():
       - damage_type, confidence, location, latitude, longitude, description
     """
     user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    user_email = user.email if user else None
 
     damage_type = request.form.get('damage_type')
     confidence  = request.form.get('confidence', 0.0, type=float)
@@ -329,6 +375,9 @@ def submit_realtime_frame():
 
     report = DamageReport(
         citizen_id=user_id,
+        user_email=user_email,
+        device_id=None,
+        report_source="citizen",
         image_path=img_filename,
         location=request.form.get('location'),
         latitude=request.form.get('latitude', type=float),
@@ -376,17 +425,12 @@ def submit_report():
     # -------------------------
     # ML INFERENCE
     # -------------------------
-    damage_type, confidence = detect_damage(file_path)
+    damage_type, confidence, area, count = detect_damage(file_path)
 
     # -------------------------
-    # SEVERITY LOGIC
+    # SEVERITY LOGIC (Confidence + Area + Count)
     # -------------------------
-    if confidence >= 0.8:
-        severity = "high"
-    elif confidence >= 0.5:
-        severity = "medium"
-    else:
-        severity = "low"
+    severity = calculate_severity(confidence, area, count)
 
     # -------------------------
     # CREATE DB RECORD
@@ -394,6 +438,8 @@ def submit_report():
     # -------------------------
     report = DamageReport(
         citizen_id=user_id,
+        device_id=None,
+        report_source="citizen",
         image_path=filename,  # 👈 critical for /api/files/images/<filename>
         location=request.form.get("location"),
         latitude=request.form.get("latitude", type=float),
@@ -448,7 +494,8 @@ def get_user_reports():
             "severity": r.severity,
             "status": r.status,
             "created_at": r.created_at.isoformat(),
-            "image_url": f"/api/files/images/{r.image_path}"
+            "image_url": f"/api/files/images/{r.image_path}",
+            "after_image_url": f"/api/files/images/{r.after_image_path}" if r.after_image_path else None
         }
         for r in reports
     ]), 200

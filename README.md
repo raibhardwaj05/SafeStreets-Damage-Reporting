@@ -4,6 +4,7 @@
 ![Flask](https://img.shields.io/badge/Framework-Flask-black)
 ![YOLO](https://img.shields.io/badge/AI-YOLOv8-red)
 ![OpenCV](https://img.shields.io/badge/ComputerVision-OpenCV-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 SafeStreets is an *AI-powered road infrastructure monitoring platform* designed to detect, report, and manage road damage efficiently.
 
@@ -16,6 +17,9 @@ The AI model was *custom-trained by our team using YOLO architecture* to detect:
 
 * *Potholes*
 * *Road cracks*
+
+## 🎥 Project Demo
+[Watch the Demo Video](https://drive.google.com/file/d/1SnSZWMF6acZdbGumuGH8KIz6wLDU1XYM/view?usp=drive_link)
 
 ---
 

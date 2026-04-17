@@ -19,6 +19,15 @@
     ========================================================== -->
     <header class="top-bar">
         <div class="top-bar__left">
+            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation"
+                aria-expanded="false">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
             <div class="top-bar__brand">
                 <div class="top-bar__logo">
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
@@ -33,17 +42,8 @@
                 <a href="dashboard.html" class="top-nav-link" id="nav-dashboard">Dashboard</a>
                 <a href="report-damage.html" class="top-nav-link" id="nav-report">Report Damage</a>
                 <a href="map.html" class="top-nav-link" id="nav-map">Map</a>
-                <a href="dashcam.html" class="top-nav-link" id="nav-dashcam">Dashcam Preview</a>
+                <!-- <a href="dashcam.html" class="top-nav-link" id="nav-dashcam">Dashcam Preview</a> -->
             </nav>
-            <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation"
-                aria-expanded="false">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-            </button>
         </div>
         <div class="top-bar__right">
             <div class="top-bar__user-info">
@@ -123,7 +123,7 @@
         <a href="dashboard.html" class="mobile-nav__link">Dashboard</a>
         <a href="report-damage.html" class="mobile-nav__link">Report Damage</a>
         <a href="map.html" class="mobile-nav__link">Map</a>
-        <a href="dashcam.html" class="mobile-nav__link">Dashcam Preview</a>
+        <!-- <a href="dashcam.html" class="mobile-nav__link">Dashcam Preview</a> -->
     </div>
     <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="toggleMobileNav()"></div>
 
@@ -142,4 +142,3 @@
 </body>
 
 </html>
-

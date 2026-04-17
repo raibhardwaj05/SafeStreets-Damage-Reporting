@@ -3,8 +3,8 @@
 let allOfficerReports = [];
 let filteredReports = [];
 let currentPage = 1;
-const pageSize = 4;
-let sourceFilter = 'all';
+const pageSize = 10;
+let sourceFilter = 'citizen'; // Default filter
 
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', async () => {
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadReports() {
     const tbody = document.getElementById('reportsTableBody');
     if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;"><div class="spinner"></div> Loading reports...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;"><div class="spinner"></div> Loading reports...</td></tr>';
     }
 
     try {
@@ -32,7 +32,7 @@ async function loadReports() {
     } catch (error) {
         console.error('Load Error:', error);
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color:red;">Error loading reports: ${error.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color:red;">Error loading reports: ${error.message}</td></tr>`;
         }
     }
 }
@@ -41,8 +41,9 @@ async function loadReports() {
  * Initialize dashboard
  */
 function initDashboard() {
+    updateSourceButtons();  // highlight Citizen button
+    applyFilters();         // apply citizen filter
     updateKPIs();
-    renderReportsTable();
 }
 
 /**
@@ -114,8 +115,10 @@ function applyFilters() {
 
         // 5. Source Logic
         let sourceMatch = true;
-        if (sourceFilter === 'dashcam') {
-            sourceMatch = false;
+        if (sourceFilter === 'citizen') {
+            sourceMatch = getReportSource(report) === 'citizen';
+        } else if (sourceFilter === 'dashcam') {
+            sourceMatch = getReportSource(report) === 'dashcam';
         }
 
         return searchMatch && issueTypeMatch && severityMatch && statusMatch && dateMatch && sourceMatch;
@@ -126,11 +129,7 @@ function applyFilters() {
 }
 
 function getReportSource(report) {
-    const imageUrl = report.image_url || '';
-    if (imageUrl.indexOf('VIDEO_REPORT') !== -1 || imageUrl.indexOf('rt_submit_') !== -1) {
-        return 'dashcam';
-    }
-    return 'citizen';
+    return report.report_source || 'citizen';
 }
 
 /**
@@ -164,7 +163,7 @@ function renderReportsTable() {
     }
 
     if (filteredReports.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No reports found matching the filters.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">No reports found matching the filters.</td></tr>';
         if (summary) {
             summary.textContent = 'Showing 0 to 0 of 0 reports';
         }
@@ -184,9 +183,17 @@ function renderReportsTable() {
     const pageItems = filteredReports.slice(startIndex, endIndex);
 
     tbody.innerHTML = pageItems.map(report => {
-        const severity = (report.severity || 'low').toLowerCase();
+        let severity = (report.severity || 'low').toLowerCase();
+
+        // Trust exact priority returned by backend (size + confidence combined)
+
         const severityPill = `pill-${severity}`;
         const severityText = severity.charAt(0).toUpperCase() + severity.slice(1);
+
+        let displayLocation = report.location || '';
+        if (getReportSource(report) === 'dashcam' && report.latitude != null && report.longitude != null) {
+            displayLocation = report.latitude + ', ' + report.longitude;
+        }
 
         // Status mapping
         let statusPill = 'pill-pending';
@@ -205,7 +212,8 @@ function renderReportsTable() {
         return `
             <tr>
                 <td style="font-weight: 600;" title="${report.id}">${report.id.split('-')[0].substring(0, 8)}</td>
-                <td>${report.location}</td>
+                <td>${report.reported_by || 'Unknown'}</td>
+                <td>${displayLocation}</td>
                 <td>${report.damage_type || 'Road Damage'}</td>
                 <td><span class="pill ${statusPill}">${statusText}</span></td>
                 <td><span class="pill pill-${severity}">${severityText}</span></td>
@@ -260,11 +268,32 @@ function renderReportsTable() {
             let buttons = '';
             const prevPage = currentPage - 1;
             buttons += '<button class="page-btn' + (currentPage === 1 ? ' disabled' : '') + '" onclick="changePage(' + prevPage + ')"' + (currentPage === 1 ? ' disabled' : '') + '>&lt;</button>';
-            for (let i = 1; i <= totalPages; i++) {
+            
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            if (startPage > 1) {
+                buttons += '<button class="page-btn" onclick="changePage(1)">1</button>';
+                if (startPage > 2) buttons += '<span class="page-ellipsis" style="padding: 0.5rem; color: #64748b; font-weight: 600;">...</span>';
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
                 buttons += '<button class="page-btn' + (i === currentPage ? ' active' : '') + '" onclick="changePage(' + i + ')">' + i + '</button>';
             }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) buttons += '<span class="page-ellipsis" style="padding: 0.5rem; color: #64748b; font-weight: 600;">...</span>';
+                buttons += '<button class="page-btn" onclick="changePage(' + totalPages + ')">' + totalPages + '</button>';
+            }
+
             const nextPage = currentPage + 1;
             buttons += '<button class="page-btn' + (currentPage === totalPages ? ' disabled' : '') + '" onclick="changePage(' + nextPage + ')"' + (currentPage === totalPages ? ' disabled' : '') + '>&gt;</button>';
+            
             pagination.innerHTML = buttons;
         }
     }
@@ -280,11 +309,7 @@ function changePage(page) {
 }
 
 function setSourceFilter(source) {
-    if (sourceFilter === source) {
-        sourceFilter = 'all';
-    } else {
-        sourceFilter = source;
-    }
+    sourceFilter = source;   // always set selected source
     currentPage = 1;
     updateSourceButtons();
     applyFilters();
@@ -333,13 +358,19 @@ window.viewReport = (id) => {
 };
 
 window.verifyReport = (id) => {
-    window.location.href = `verification.html?id=${id}`;
+    const report = allOfficerReports.find(r => r.id === id);
+    const page = (report && getReportSource(report) === 'dashcam') ? 'dashcam-verification.html' : 'verification.html';
+    window.location.href = `${page}?id=${id}`;
 };
 window.assignReport = (id) => {
-    window.location.href = `assignment.html?id=${id}`;
+    const report = allOfficerReports.find(r => r.id === id);
+    const page = (report && getReportSource(report) === 'dashcam') ? 'dashcam-assignment.html' : 'assignment.html';
+    window.location.href = `${page}?id=${id}`;
 };
 window.monitorReport = (id) => {
-    window.location.href = `monitoring.html?id=${id}`;
+    const report = allOfficerReports.find(r => r.id === id);
+    const page = (report && getReportSource(report) === 'dashcam') ? 'dashcam-monitoring.html' : 'monitoring.html';
+    window.location.href = `${page}?id=${id}`;
 };
 
 // --- Slide Panel Logic ---

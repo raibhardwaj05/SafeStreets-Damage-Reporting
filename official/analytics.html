@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../shared/styles.css">
     <link rel="stylesheet" href="styles/dashboard.css">
     <link rel="stylesheet" href="styles/analytics.css">
+    <link rel="stylesheet" href="styles/predictive-risk.css">
 </head>
 
 <body>
@@ -59,64 +60,131 @@
 
     <div class="container">
 
-        <!-- Filters -->
-        <div class="analytics-filters">
-            <h2>Filters</h2>
-            <div class="filters-grid">
-                <div class="form-group">
-                    <label class="form-label">Time Period</label>
-                    <select class="form-select" id="timeFilter">
-                        <option value="30">Last Month</option>
-                        <option value="90" selected>Last 3 Months</option>
-                        <option value="180">Last 6 Months</option>
-                        <option value="365">Last Year</option>
-                    </select>
+        <!-- ============================================================
+             🗓️ POTHOLE ACTIVITY HEATMAP (GitHub-style)
+             ============================================================ -->
+        <div class="analytics-section" id="heatmapSection">
+            <div class="section-header-flex">
+                <div>
+                    <h2>🗓️ Pothole Activity Heatmap</h2>
+                    <p class="section-description">
+                        Each square = one day. Darker colour = more potholes reported.
+                        Click any month label to see the prediction for that month.
+                    </p>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">Sector</label>
-                    <select class="form-select" id="sectorFilter">
-                        <option value="">All Sectors</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <button class="btn btn-secondary" onclick="exportReport()">Export Report</button>
+                <div class="hm-year-nav">
+                    <button class="hm-year-btn" id="hmPrevYear" onclick="changeHeatmapYear(-1)">&#9664;</button>
+                    <span class="hm-year-label" id="hmYearLabel">2026</span>
+                    <button class="hm-year-btn" id="hmNextYear" onclick="changeHeatmapYear(1)">&#9654;</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Summary Stats -->
-        <div class="analytics-section">
-            <h2>Summary Statistics</h2>
-            <div class="stats-grid" id="summaryStats"></div>
-        </div>
+            <!-- Heatmap card -->
+            <div class="stat-card hm-card">
+                <!-- Loading -->
+                <div id="hmLoading" class="hm-loading-state">
+                    <div class="pr-spinner"></div>
+                    <span>Loading pothole data…</span>
+                </div>
 
-        <!-- Repair Time -->
-        <div class="analytics-section">
-            <h2>Average Repair Time (Days)</h2>
-            <div class="stat-card">
-                <div class="chart-bars" id="repairTimeChart"></div>
+                <!-- 12 monthly blocks (hidden until data loads) -->
+                <div id="hmCalendar" style="display:none;">
+                    <div class="hm-total-row">
+                        <span id="hmTotalPill" class="hm-total-pill"></span>
+                    </div>
+
+                    <!-- 12 monthly mini-calendar blocks -->
+                    <div class="hmm-blocks-grid" id="hmGrid"></div>
+
+                    <!-- Legend -->
+                    <div class="hm-legend-row">
+                        <span class="hm-legend-lbl">Less</span>
+                        <div class="hm-legend-cell hm-l0"></div>
+                        <div class="hm-legend-cell hm-l1"></div>
+                        <div class="hm-legend-cell hm-l2"></div>
+                        <div class="hm-legend-cell hm-l3"></div>
+                        <div class="hm-legend-cell hm-l4"></div>
+                        <span class="hm-legend-lbl">More</span>
+                    </div>
+                </div>
             </div>
+
+
+
+            <!-- Month Prediction Panel (opens on month click) -->
+            <div id="hmMonthPanel" class="hm-month-panel" style="display:none;"></div>
         </div>
 
-        <!-- Contractor Performance -->
-        <div class="analytics-section">
-            <h2>Contractor Performance</h2>
-            <div class="stat-card">
-                <div id="contractorPerformance"></div>
-            </div>
-        </div>
+        <!-- ============================================================
+             🔮 PREDICTIVE RISK LAYER (Cluster Cards)
+             ============================================================ -->
+        <div class="analytics-section" id="predictiveRiskContainer">
 
-        <!-- Road Health Index -->
-        <div class="analytics-section">
-            <h2>Road Health Index by Sector</h2>
-            <div class="stat-card">
-                <div class="health-index-grid" id="roadHealthGrid"></div>
+            <div class="section-header-flex">
+                <div>
+                    <h2>🔮 Predictive Risk Layer</h2>
+                    <p class="section-description">
+                        Which locations are likely to develop potholes again?
+                        Clusters live pothole reports within a 1&nbsp;km radius and scores each hotspot
+                        using frequency, recency, growth trend and severity — refreshed every hour.
+                    </p>
+                </div>
+                <button class="btn btn-primary btn-sm" id="prRefreshBtn"
+                        onclick="triggerPredictiveRiskRefresh()">
+                    🔄 Refresh
+                </button>
             </div>
+
+            <!-- Summary counters -->
+            <div class="pr-summary-bar">
+                <div class="pr-summary-pill pr-pill-total">
+                    <span class="pr-pill-num" id="prTotalCount">—</span>
+                    <span class="pr-pill-lbl">Clusters</span>
+                </div>
+                <div class="pr-summary-pill pr-pill-high">
+                    <span class="pr-pill-num" id="prHighCount">—</span>
+                    <span class="pr-pill-lbl">🔴 High Risk</span>
+                </div>
+                <div class="pr-summary-pill pr-pill-medium">
+                    <span class="pr-pill-num" id="prMedCount">—</span>
+                    <span class="pr-pill-lbl">🟡 Medium Risk</span>
+                </div>
+                <div class="pr-summary-pill pr-pill-low">
+                    <span class="pr-pill-num" id="prLowCount">—</span>
+                    <span class="pr-pill-lbl">🟢 Low Risk</span>
+                </div>
+            </div>
+
+            <!-- Filter pills -->
+            <div class="pr-filters">
+                <button class="pr-filter-btn active" data-level="all"
+                        onclick="filterPredictiveRisk(this, 'all')">All</button>
+                <button class="pr-filter-btn pr-filter-high" data-level="high"
+                        onclick="filterPredictiveRisk(this, 'high')">🔴 High</button>
+                <button class="pr-filter-btn pr-filter-medium" data-level="medium"
+                        onclick="filterPredictiveRisk(this, 'medium')">🟡 Medium</button>
+                <button class="pr-filter-btn pr-filter-low" data-level="low"
+                        onclick="filterPredictiveRisk(this, 'low')">🟢 Low</button>
+            </div>
+
+            <!-- Loading spinner -->
+            <div id="predictiveRiskSpinner" class="pr-loading" style="display:none;">
+                <div class="pr-spinner"></div>
+                <span>Analysing pothole clusters…</span>
+            </div>
+
+            <!-- Cards grid -->
+            <div id="predictiveRiskBody" class="pr-cards-grid">
+                <!-- Populated by analytics.js → renderPredictiveRiskCards() -->
+            </div>
+
         </div>
 
     </div>
+
+
+
+
 
     <script src="../shared/navigation.js"></script>
     <script src="../shared/auth.js"></script>

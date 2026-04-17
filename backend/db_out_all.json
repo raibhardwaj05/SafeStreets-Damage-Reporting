@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "tender_id": "NMMC/ CE/ 482 / 2025-2026",
+    "work_index": 1,
+    "organization": "Navi Mumbai Municipal Corporation",
+    "district": "Raigad",
+    "city_or_taluka": "Navi Mumbai",
+    "work_type": "road",
+    "department": "City Engineer Department",
+    "description_english": "Improvement to Internal Road of Sector - 16 A by Asphalting in Nerul ward",
+    "location_summary": "Sector 16 A, Nerul, Navi Mumbai",
+    "location_type": "area_name",
+    "noc_reference": "NMMC/ CE/ 482 / 2025-2026",
+    "work_start_date": null,
+    "work_end_date": null,
+    "duration_days": null,
+    "amount_inr": 5324485,
+    "lat": 19.0330488,
+    "lng": 73.0296625,
+    "geo_confidence": 0.1,
+    "geo_status": "fallback_only",
+    "geocode_query": "Navi Mumbai, Thane, Maharashtra",
+    "route_points": null,
+    "created_at": "2026-03-28 04:28:22.511863"
+  }
+]

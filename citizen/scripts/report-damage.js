@@ -96,6 +96,12 @@ let rtCanvas = null;
 let rtCtx = null;
 let rtCurrentFacingMode = 'environment'; // 'environment' = back, 'user' = front
 
+// Auto-save: cooldown + confidence threshold
+let rtLastDetectionTime = 0;
+const RT_DETECTION_COOLDOWN = 4000; // 4 seconds
+const RT_CONF_THRESHOLD = 0.4;
+let rtSessionLog = []; // tracks all saved reports this session
+
 function initRealtimeTab() {
     rtCanvas = document.createElement('canvas');
 }
@@ -144,22 +150,32 @@ async function startRealtime(facingMode) {
 }
 
 let rtRequestInFlight = false;
-
 async function sendRealtimeFrame() {
 
-    if (!rtIsRunning || rtRequestInFlight) return;
-
-    const video = document.getElementById('webcamVideo');
-
-    if (video.readyState < 2) return;
+    if (!rtIsRunning) return;
+    if (rtRequestInFlight) return;
 
     rtRequestInFlight = true;
 
+    const video = document.getElementById('webcamVideo');
+
+    if (video.readyState < 2) {
+        rtRequestInFlight = false;
+        return;
+    }
+
+    // Capture frame
+    rtCtx.drawImage(video, 0, 0, rtCanvas.width, rtCanvas.height);
+    const frameData = rtCanvas.toDataURL('image/jpeg', 0.5);
+
     try {
-
-        rtCtx.drawImage(video, 0, 0, rtCanvas.width, rtCanvas.height);
-
-        const frameData = rtCanvas.toDataURL('image/jpeg', 0.6);
+        const payload = {
+            frame: frameData,
+            location: gpsData.locationText || '',
+            latitude: gpsData.lat,
+            longitude: gpsData.lng,
+            auto_save: true // Tells backend to save automatically
+        };
 
         rtFramesSent++;
         document.getElementById('rtFrames').textContent = rtFramesSent;
@@ -170,9 +186,7 @@ async function sendRealtimeFrame() {
                 "Authorization": `Bearer ${Auth.getToken()}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                frame: frameData
-            })
+            body: JSON.stringify(payload)
         });
 
         const data = await res.json();
@@ -181,9 +195,34 @@ async function sendRealtimeFrame() {
 
         updateRealtimeOverlay(data);
 
+        // -------------------------------------------------
+        // HANDLE DETECTION → AUTO-SAVE EACH AS INDIVIDUAL REPORT
+        // -------------------------------------------------
         if (data.detected) {
             rtTotalDetections++;
             document.getElementById('rtTotal').textContent = rtTotalDetections;
+
+            // If backend auto-saved it, we log it to UI
+            if (data.report_id) {
+                console.log('Detection report saved automatically:', data.report_id);
+                showToast(`Report #${data.report_id.toString().slice(0, 8)} saved`);
+
+                const imgSrc = data.annotated_image
+                    ? (data.annotated_image.startsWith('data:')
+                        ? data.annotated_image
+                        : `data:image/jpeg;base64,${data.annotated_image}`)
+                    : null;
+
+                rtSessionLog.push({
+                    report_id: data.report_id.toString(),
+                    damage_type: data.damage_type,
+                    confidence: data.confidence,
+                    image: imgSrc,
+                    time: new Date().toLocaleTimeString()
+                });
+
+                updateSessionLogUI();
+            }
         }
 
     } catch (err) {
@@ -191,7 +230,7 @@ async function sendRealtimeFrame() {
     }
 
     rtRequestInFlight = false;
-}
+};
 
 // Stores last realtime detection for manual submit
 let rtLastDetection = null;
@@ -295,9 +334,9 @@ async function switchCamera() {
             rtCanvas.width = video.videoWidth;
             rtCanvas.height = video.videoHeight;
             rtCtx = rtCanvas.getContext('2d');
-            rtInterval = setInterval(sendRealtimeFrame, 1000);
-            switchBtn.disabled = false;
+            rtInterval = setInterval(sendRealtimeFrame, 100); // 10 FPS attempt (limited by network latency)
         };
+        switchBtn.disabled = false;
     } catch (err) {
         showAlert("Camera Error", "Could not switch camera: " + err.message, "error");
         // Revert facing mode
@@ -417,55 +456,38 @@ async function submitVideoReport() {
     }
 }
 
-/**
- * Submit a report for the last realtime detection frame.
- */
-async function submitRealtimeReport() {
-    if (!rtLastDetection) return;
 
-    const btn = document.getElementById('rtSubmitBtn');
-    const status = document.getElementById('rtSubmitStatus');
-    btn.disabled = true;
-    btn.textContent = '⏳ Submitting...';
-    status.style.display = 'none';
 
-    const formData = new FormData();
-    formData.append('damage_type', rtLastDetection.damage_type);
-    formData.append('confidence', rtLastDetection.confidence);
-    formData.append('location', gpsData.locationText || '');
-    if (gpsData.lat !== null) {
-        formData.append('latitude', gpsData.lat);
-        formData.append('longitude', gpsData.lng);
-    }
-    const desc = document.getElementById('rtDescriptionInput')?.value?.trim();
-    if (desc) formData.append('description', desc);
-    // Attach the annotated frame image
-    if (rtLastDetection.annotated_image) {
-        formData.append('frame_b64', rtLastDetection.annotated_image);
-    }
+function updateSessionLogUI() {
+    const container = document.getElementById('rtSessionLog');
+    const countEl = document.getElementById('rtSavedCount');
+    if (!container) return;
 
-    try {
-        const res = await fetch('/api/citizen/submit-realtime-frame', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${Auth.getToken()}` },
-            body: formData
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.msg || 'Submit failed');
+    if (countEl) countEl.textContent = rtSessionLog.length;
 
-        btn.textContent = '✅ Submitted';
-        status.textContent = `Report #${data.report_id} saved successfully!`;
-        status.style.color = '#22c55e';
-        status.style.display = 'block';
-        // Clear description after submit
-        document.getElementById('rtDescriptionInput').value = '';
-    } catch (err) {
-        btn.disabled = false;
-        btn.textContent = '📤 Submit Report';
-        status.textContent = 'Error: ' + err.message;
-        status.style.color = '#f87171';
-        status.style.display = 'block';
-    }
+    const section = document.getElementById('rtSessionLogSection');
+    if (section) section.style.display = 'block';
+
+    container.innerHTML = rtSessionLog.slice().reverse().map(entry => `
+        <div style="
+            display:flex; gap:0.75rem; align-items:center;
+            padding:0.6rem; background:#f8fafc;
+            border:1px solid #e2e8f0; border-radius:8px;
+        ">
+            ${entry.image
+                ? `<img src="${entry.image}" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #cbd5e1;" alt="Detection"/>`
+                : `<div style="width:64px;height:64px;background:#e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📷</div>`
+            }
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:#1e293b;font-size:0.85rem;">
+                    ${entry.damage_type} — ${(entry.confidence * 100).toFixed(0)}%
+                </div>
+                <div style="color:#64748b;font-size:0.75rem;margin-top:2px;">
+                    ${entry.time} · Report #${entry.report_id.slice(0, 8)}
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
 // Global exposure
@@ -484,4 +506,3 @@ window.downloadAnnotatedImage = downloadAnnotatedImage;
 window.downloadAnnotatedVideo = downloadAnnotatedVideo;
 window.switchCamera = switchCamera;
 window.submitVideoReport = submitVideoReport;
-window.submitRealtimeReport = submitRealtimeReport;

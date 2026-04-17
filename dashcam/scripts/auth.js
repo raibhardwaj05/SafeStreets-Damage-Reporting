@@ -9,7 +9,7 @@ const Auth = {
     // ============================================
     // REGISTER DEVICE
     // ============================================
-    async register(vehicleNo, deviceId) {
+    async register(vehicleNo, deviceId, email) {
 
         try {
 
@@ -20,7 +20,8 @@ const Auth = {
                 },
                 body: JSON.stringify({
                     vehicle_no: vehicleNo,
-                    device_id: deviceId
+                    device_id: deviceId,
+                    email: email || ""
                 })
             });
 
@@ -67,6 +68,7 @@ const Auth = {
             localStorage.setItem("device_token", data.token);
             localStorage.setItem("device_id", data.device_id);
             localStorage.setItem("vehicle_no", data.vehicle_no);
+            localStorage.setItem("device_email", data.email || "");
 
             return data;
 
@@ -86,8 +88,11 @@ const Auth = {
         localStorage.removeItem("device_token");
         localStorage.removeItem("device_id");
         localStorage.removeItem("vehicle_no");
+        localStorage.removeItem("role");
+        localStorage.removeItem("user_name");
 
-        window.location.href = "/";
+        // Redirect to landing page (one level up from dashcam/)
+        window.location.href = "../index.html";
 
     },
 

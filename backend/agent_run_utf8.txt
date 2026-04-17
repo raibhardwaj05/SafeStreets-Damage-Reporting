@@ -1,0 +1,30 @@
+=== Starting Agent Pipeline on PDFs in C:\Users\524ta\OneDrive\Desktop\SafeStreet (3)\SafeStreet\backend\test_downloads ===
+
+--- Processing: Tendernotice_1 (4).pdf ---
+
+=== TENDER PIPELINE START ===
+[1/3] Extracting locations with Gemini...
+    Found 1 work item(s) in tender NMMC/ CE/ 482 / 2025-2026
+[2/3] Geocoding locations...
+    ΓÜá Fallback geocode used for work 1
+[3/3] Saving to database...
+    Γå║ Updated work order NMMC/ CE/ 482 / 2025-2026#1
+=== DONE: 1/1 work items saved ===
+
+  Γ£ô SUCCESS: 1 WorkOrders extracted and saved to database.
+
+==================================================
+=== Testing Agent 3 (Pothole Match) ===
+==================================================
+Simulating pothole report near newly extracted City Engineer Department work...
+Pothole GPS: 19.0340, 73.0307
+
+
+=== POTHOLE MATCH: 19.0340488,73.0306625 ===
+    No nearby work orders found within 200m
+
+Agent 3 Summary Statement:
+No government work orders found near this pothole within the last 18 months.
+
+Agent 3 Top Match:
+null

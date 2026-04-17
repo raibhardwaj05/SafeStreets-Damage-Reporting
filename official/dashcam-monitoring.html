@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Monitoring - Road Damage Detection</title>
+    <link rel="stylesheet" href="../shared/styles.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="stylesheet" href="styles/monitoring.css">
+</head>
+
+<body>
+    <!-- Top Bar / Header -->
+    <header class="header">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 11V1m16 10V1M12 23V1M4 23v-7m16 7v-7" />
+                </svg>
+            </div>
+            <span class="logo-text">SafeStreets</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="work-reports.html" class="nav-item">Reports</a>
+            <a href="analytics.html" class="nav-item">Analytics</a>
+        </nav>
+
+        <div class="header-right">
+            <!-- <button class="icon-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+            </button> -->
+            <div class="profile-section" onclick="toggleProfileMenu()">
+                <div class="profile-info">
+                    <span class="profile-name user-name">Officer Jenkins</span>
+                    <span class="profile-role user-role">District 4 Admin</span>
+                </div>
+                <div class="profile-avatar">
+                    <img id="headerAvatar"
+                        src="https://ui-avatars.com/api/?name=Officer+Jenkins&background=f1f5f9&color=64748b"
+                        alt="Avatar">
+                </div>
+                <!-- Profile Menu (Hidden) -->
+                <div class="profile-menu" id="profileMenu">
+                    <button class="menu-item logout" onclick="confirmLogout()">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Work Details -->
+        <div id="workDetails" style="display: none;">
+            <!-- Back Button -->
+            <div class="back-bar" style="margin-bottom: 1.5rem;">
+                <button class="btn btn-ghost" onclick="window.location.href='dashboard.html'"
+                    style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #334155; font-weight: 600; transition: all 0.2s; cursor: pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg> Back to Dashboard
+                </button>
+            </div>
+
+            <!-- Status Timeline -->
+            <div class="status-timeline-section">
+                <h2>Status Timeline</h2>
+                <div class="timeline" id="statusTimeline">
+                    <!-- Timeline items will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Work Status Indicator -->
+            <div class="work-status-section stat-card">
+                <h2>Work Status</h2>
+                <div class="work-status-indicator stat-card" id="workStatusIndicator">
+                    <!-- Status indicator will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Before/After Photos -->
+            <div class="photos-section stat-card">
+                <h2>Photo Documentation (Dashcam)</h2>
+                <div class="photo-comparison dashcam-grid">
+                    <!-- Before Section -->
+                    <div class="photo-card stat-card">
+                        <h3>Before (Detected Sequence)</h3>
+                        <div class="dual-photo-grid">
+                            <div class="photo-slot">
+                                <span class="photo-label">First Image</span>
+                                <img id="beforePhoto" class="comparison-photo" alt="First detection">
+                            </div>
+                            <div class="photo-slot">
+                                <span class="photo-label">Last Image</span>
+                                <img id="beforePhotoLast" class="comparison-photo" alt="Last detection">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- After Section -->
+                    <div class="photo-card stat-card">
+                        <h3>After (Repair Documentation)</h3>
+                        <div class="dual-photo-grid">
+                            <div class="photo-slot">
+                                <span class="photo-label">First Image</span>
+                                <div class="after-photo-container">
+                                    <img id="afterPhoto" class="comparison-photo" alt="After First">
+                                </div>
+                                <div class="upload-overlay small">
+                                    <button class="upload-btn" onclick="document.getElementById('afterImageUploadFirst').click()">
+                                        Upload First
+                                    </button>
+                                    <input type="file" id="afterImageUploadFirst" accept="image/*" style="display: none;" onchange="handleAfterImageUpload(event, 'first')">
+                                </div>
+                            </div>
+                            <div class="photo-slot">
+                                <span class="photo-label">Last Image</span>
+                                <div class="after-photo-container">
+                                    <img id="afterPhotoLast" class="comparison-photo" alt="After Last">
+                                </div>
+                                <div class="upload-overlay small">
+                                    <button class="upload-btn" onclick="document.getElementById('afterImageUploadLast').click()">
+                                        Upload Last
+                                    </button>
+                                    <input type="file" id="afterImageUploadLast" accept="image/*" style="display: none;" onchange="handleAfterImageUpload(event, 'last')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Completion Section -->
+            <div class="completion-section stat-card">
+                <h2>Report Completion</h2>
+                <div class="completion-card stat-card">
+                    <div class="form-group">
+                        <label class="checkbox-container disabled" id="checkboxWrapper">
+                            <input type="checkbox" id="completionCheckbox" disabled onchange="toggleSubmitButton()">
+                            <span class="checkmark"></span>
+                            I confirm that the report is completed and the issue is solved.
+                        </label>
+                        <p class="helper-text" id="uploadHelperText" style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">Please upload both After images (First & Last) to enable verification.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="completionDescription">Work Summary / Description</label>
+                        <textarea id="completionDescription" placeholder="Provide a brief description of the work done..."></textarea>
+                    </div>
+                    <div class="completion-actions">
+                        <button id="submitReportBtn" class="btn btn-primary btn-large" disabled onclick="submitFinalReport()">
+                            Submit Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPS & Timestamp Logs
+            <div class="logs-section stat-card">
+                <h2>Work Logs</h2>
+                <div class="logs-container" id="logsContainer">
+                    Logs will be populated by JavaScript -->
+            <!-- </div>
+            </div> -->
+
+            <!-- Actions -->
+            <div class="monitoring-actions">
+                <button class="btn btn-success btn-large" id="markCompletedBtn" onclick="markCompleted()">
+                    Mark as Completed
+                </button>
+                </button>
+            </div>
+        </div>
+
+        <!-- Active Works List (Fallback) -->
+        <div id="activeWorksList" style="display: none;">
+            <h2>Active Work Orders</h2>
+            <div class="works-grid" id="worksGrid">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- For JS compatibility, hidden work selector -->
+    <select id="workSelector" style="display: none;"></select>
+
+    <script src="../shared/navigation.js"></script>
+    <script src="../shared/modal.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="scripts/storage-helper.js"></script>
+    <script src="scripts/dashcam-monitoring.js"></script>
+</body>
+
+</html>

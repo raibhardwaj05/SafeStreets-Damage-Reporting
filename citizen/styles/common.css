@@ -224,10 +224,12 @@
 @media (max-width: 1024px) {
     .hamburger-btn {
         display: flex;
+        /* Ensure it is visible on mobile/tablet */
     }
-    
+
     .top-bar__nav {
-        display: none; /* Hide top nav on mobile, use drawer */
+        display: none;
+        /* Hide top nav on mobile, use drawer */
     }
 }
 

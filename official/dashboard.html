@@ -21,7 +21,7 @@
                     <path d="M4 11V1m16 10V1M12 23V1M4 23v-7m16 7v-7" />
                 </svg>
             </div>
-            <span class="logo-text">SafeStreets</span>
+            <span class="logo-text">SafeStreets <span class="accent">Officer</span></span>
         </div>
 
         <nav class="nav-links">
@@ -69,7 +69,7 @@
         <!-- Dashboard Heading -->
         <header class="page-header">
             <div class="page-title">
-                <h1><span class="logo-text">Officer <span class="accent">Dashboard</span></span></h1>
+                <h1>Dashboard</h1>
                 <!-- <p>Real-time road damage management and reporting dashboard</p> -->
             </div>
             <div class="page-actions">
@@ -260,16 +260,20 @@
         <section class="reports-section">
             <header class="section-header">
                 <h2>Recent Reports</h2>
+                <a href="work-reports.html" class="view-all">View All Reports</a>
             </header>
-            <div class="report-source-toggle">
-                <button type="button" class="source-btn" id="sourceCitizenBtn" onclick="setSourceFilter('citizen')">Citizen</button>
-                <button type="button" class="source-btn" id="sourceDashcamBtn" onclick="setSourceFilter('dashcam')">Dashcam</button>
+            <div class="report-source-toggle" style="margin-top: -0.5rem; margin-bottom: 1.25rem;">
+                <button id="sourceCitizenBtn" class="source-btn active" onclick="setSourceFilter('citizen')">Citizen
+                    Reports</button>
+                <button id="sourceDashcamBtn" class="source-btn" onclick="setSourceFilter('dashcam')">Dashcam
+                    Reports</button>
             </div>
             <div class="table-container">
                 <table class="reports-table">
                     <thead>
                         <tr>
                             <th>REPORT ID</th>
+                            <th>REPORTER</th>
                             <th>LOCATION</th>
                             <th>ISSUE TYPE</th>
                             <th>STATUS</th>
@@ -283,9 +287,11 @@
                     </tbody>
                 </table>
             </div>
-            <div class="table-footer">
-                <div class="table-summary" id="reportsSummary"></div>
-                <div class="pagination" id="reportsPagination"></div>
+            
+            <!-- Pagination Controls -->
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.875rem; color: #6b7280; padding: 0 1rem;">
+                <div id="reportsSummary" class="reports-summary"></div>
+                <div id="reportsPagination" class="pagination"></div>
             </div>
         </section>
     </main>

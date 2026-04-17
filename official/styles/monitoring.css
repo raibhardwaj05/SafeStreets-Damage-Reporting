@@ -106,6 +106,31 @@
     gap: 2rem;
 }
 
+.photo-comparison.dashcam-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+
+.dual-photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.photo-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.photo-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.5px;
+}
+
 .photo-card {
     background: var(--bg-card, #ffffff);
     padding: 1.5rem;
@@ -263,6 +288,137 @@
         flex-direction: column;
         gap: 0.5rem;
     }
+}
+
+/* ── Completion Section ───────────────────────────────────── */
+.completion-section {
+    margin-top: 2rem;
+}
+
+.completion-card {
+    background: var(--bg-card, #ffffff);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow, 0 8px 20px rgb(0 0 0 / 0.12));
+    border: 1px solid var(--border, #e2e8f0);
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark, #1e293b);
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-main, #334155);
+    user-select: none;
+}
+
+.checkbox-container input {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border, #e2e8f0);
+    background: #f8fafc;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    transition: all 0.2s;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary, #3b82f6);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.completion-actions {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border, #e2e8f0);
+    padding-top: 1.5rem;
+}
+
+.btn-primary:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ── After Photo Container & Buttons ─────────────────── */
+.after-photo-container {
+    position: relative;
+    width: 100%;
+}
+
+.upload-overlay {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--primary-color, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.upload-btn:hover {
+    background-color: var(--primary-dark, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.upload-btn svg {
+    display: block;
+}
+
+.upload-overlay.small {
+    margin-top: 0.75rem;
+}
+
+.upload-overlay.small .upload-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.checkbox-container.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.checkbox-container.disabled input {
+    cursor: not-allowed;
 }
 
 /* ── Timeline ─────────────────────────────────────────────── */

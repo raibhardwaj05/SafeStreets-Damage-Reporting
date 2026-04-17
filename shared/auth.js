@@ -111,8 +111,10 @@ const Auth = {
             const response = await fetch(url, { ...options, headers });
 
             if (response.status === 401 || response.status === 403) {
-                console.warn('Session expired or unauthorized');
-                this.logout();
+                if (!url.includes('/api/files/')) {
+                    console.warn('Session expired or unauthorized');
+                    this.logout();
+                }
                 return response;
             }
 

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Report - Road Damage Detection</title>
+
+    <link rel="stylesheet" href="../shared/styles.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="stylesheet" href="styles/verification.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+
+<body>
+
+    <!-- Top Bar / Header -->
+    <header class="header">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 11V1m16 10V1M12 23V1M4 23v-7m16 7v-7" />
+                </svg>
+            </div>
+            <span class="logo-text">SafeStreets</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="work-reports.html" class="nav-item">Reports</a>
+            <a href="analytics.html" class="nav-item">Analytics</a>
+        </nav>
+
+        <div class="header-right">
+            <!-- <button class="icon-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+            </button> -->
+            <div class="profile-section" onclick="toggleProfileMenu()">
+                <div class="profile-info">
+                    <span class="profile-name user-name">Officer Jenkins</span>
+                    <span class="profile-role user-role">District 4 Admin</span>
+                </div>
+                <div class="profile-avatar">
+                    <img id="headerAvatar"
+                        src="https://ui-avatars.com/api/?name=Officer+Jenkins&background=f1f5f9&color=64748b"
+                        alt="Avatar">
+                </div>
+                <!-- Profile Menu (Hidden) -->
+                <div class="profile-menu" id="profileMenu">
+                    <button class="menu-item logout" onclick="confirmLogout()">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+        <!-- Verification Detail Container (Shown when ID provided) -->
+        <div id="verificationDetail" class="verification-container">
+
+            <!-- LEFT: MEDIA -->
+            <div class="media-section">
+                <h2>Uploaded Media</h2>
+
+                <div class="media-preview">
+                    <img id="reportImage" class="image-preview" alt="Reported Damage" style="display:none;">
+                </div>
+
+                <!-- Agent 3 Accountability Investigation -->
+                <h3 class="acct-heading">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+                         stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px;">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Agent 3 Investigation
+                </h3>
+                <div class="acct-panel" id="accountabilityPanel">
+                    <!-- Populated by checkAccountability() in dashcam-verification.js -->
+                </div>
+
+            </div>
+
+            <!-- RIGHT: ACTIONS -->
+            <div class="action-panel">
+                <div class="panel-header-row"
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2>Report Information</h2>
+                    <button class="btn btn-secondary btn-sm" onclick="window.location.href='dashboard.html'">Back to
+                        Dashboard</button>
+                </div>
+                <div class="report-info" id="reportInfo"></div>
+
+                <h3>Location</h3>
+                <div class="map-preview">
+                    <div id="map" style="width:100%; height:250px; border-radius:8px;"></div>
+                    <p id="mapCoords"></p>
+                </div>
+
+                <h3>AI Damage Detection Result</h3>
+                <div class="ai-result" id="aiResultBelowMap"></div>
+
+                <h2>Verification</h2>
+                <div class="stat-card">
+                    <label class="form-label" style="color: black;">Reason for Decision</label>
+                    <textarea id="reasonInput" class="form-textarea" rows="4"
+                        placeholder="Enter reason for approval or rejection..."></textarea>
+                </div>
+
+                <div class="verification-actions">
+                    <button class="btn btn-success btn-large" onclick="approveReport()">
+                        ✓ Approve
+                    </button>
+                    <button class="btn btn-danger btn-large" onclick="rejectReport()">
+                        ✗ Reject
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="../shared/navigation.js"></script>
+    <script src="../shared/auth.js"></script>
+    <script src="../shared/modal.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script src="scripts/dashcam-verification.js?v=3"></script>
+
+
+</body>
+
+</html>

@@ -108,24 +108,20 @@ let rtFramesSent = 0;
 let rtCanvas = null;
 let rtCtx = null;
 let rtCurrentFacingMode = 'environment'; // 'environment' = back, 'user' = front
+let rtSocket = null;
 
 // Dynamic FPS control
-let rtDynamicDelay = 300;     // starting delay (~3 FPS)
-const rtMinDelay = 200;       // max speed (~5 FPS)
-const rtMaxDelay = 900;       // slowest (~1 FPS)
+let rtDynamicDelay = 50;     // starting delay (~20 FPS)
+const rtMinDelay = 30;       // max speed (~30 FPS)
+const rtMaxDelay = 500;       // slowest (~2 FPS)
 
-// 4 seconds cool down period
-// 4 seconds cool down period
+// 4 seconds cool down period between reports
 let rtLastDetectionTime = 0;
 const RT_DETECTION_COOLDOWN = 4000;
 
-// dashcam auto report session
-let rtDetectionSession = null;
-let rtSessionStartTime = null;
-
-// Interval after which dashcam detections are grouped into a single report
-const RT_REPORT_INTERVAL = 30000; // 30 seconds
+// Per-detection report submission
 const RT_CONF_THRESHOLD = 0.4;
+let rtSessionLog = []; // tracks all saved reports this session
 
 
 function initRealtimeTab() {
@@ -139,7 +135,7 @@ async function startRealtime(facingMode) {
         rtStream = await navigator.mediaDevices.getUserMedia({
             video: {
                 width: { ideal: 640 },
-                height: { ideal: 480 },
+                height: { ideal: 640 },
                 facingMode: { ideal: rtCurrentFacingMode }
             },
             audio: false
@@ -192,20 +188,74 @@ async function startRealtime(facingMode) {
 
     // Wait for video to be ready then start polling
     video.onloadedmetadata = () => {
-
-        // Reduce resolution for faster detection
-        rtCanvas.width = 416;
-        rtCanvas.height = 416;
+        // Match TensorRT model tile size natively
+        rtCanvas.width = 640;
+        rtCanvas.height = 640;
 
         rtCtx = rtCanvas.getContext('2d');
 
-        startRealtimeLoop(); // start adaptive loop
+        initWebSocket();
+        startRealtimeLoop(); // start loop immediately, websocket will buffer slightly until open
+    };
+}
+function initWebSocket() {
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    rtSocket = new WebSocket(`${wsProtocol}//${window.location.host}/ws-detect`);
+    
+    rtSocket.onopen = () => {
+        // Authenticate immediately
+        rtSocket.send(JSON.stringify({ type: 'auth', token: Auth.getToken() }));
+        console.log("WebSocket connected and authenticated for dashcam.");
+    };
+    
+    rtSocket.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            updateRealtimeOverlay(data);
+            
+            if (data.detected) {
+                rtTotalDetections++;
+                document.getElementById('rtTotal').textContent = rtTotalDetections;
+                
+                if (data.report_id) {
+                    console.log('Detection report saved automatically via WS:', data.report_id);
+                    showToast(`Report #${data.report_id.toString().slice(0, 8)} saved`);
+
+                    const imgSrc = data.annotated_image
+                        ? (data.annotated_image.startsWith('data:')
+                            ? data.annotated_image
+                            : `data:image/jpeg;base64,${data.annotated_image}`)
+                        : null;
+
+                    rtSessionLog.push({
+                        report_id: data.report_id.toString(),
+                        damage_type: data.damage_type,
+                        confidence: data.confidence,
+                        image: imgSrc,
+                        time: new Date().toLocaleTimeString()
+                    });
+
+                    updateSessionLogUI();
+                }
+            }
+        } catch (err) {
+            console.warn("WS parsing error", err);
+        }
+    };
+    
+    rtSocket.onclose = () => {
+        if (rtIsRunning) {
+            console.warn("WebSocket closed unexpectedly. Reconnecting in 2s...");
+            setTimeout(initWebSocket, 2000);
+        } else {
+            console.log("WebSocket closed explicitly.");
+        }
     };
 }
 
 async function sendRealtimeFrame() {
 
-    if (!rtIsRunning) return;
+    if (!rtIsRunning || !rtSocket || rtSocket.readyState !== WebSocket.OPEN) return;
     if (rtRequestInFlight) return;
 
     rtRequestInFlight = true;
@@ -217,142 +267,31 @@ async function sendRealtimeFrame() {
         return;
     }
 
-    // Capture frame
+    // Capture frame on canvas natively scaled to 640x640
     rtCtx.drawImage(video, 0, 0, rtCanvas.width, rtCanvas.height);
-    const frameData = rtCanvas.toDataURL('image/jpeg', 0.5);
-
-    rtFramesSent++;
-    document.getElementById('rtFrames').textContent = rtFramesSent;
-
-    try {
-
-        const res = await fetch("/api/dashcam/detect-frame", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${Auth.getToken()}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                frame: frameData,
-                location: gpsData.locationText,
-                latitude: gpsData.lat,
-                longitude: gpsData.lng
-            })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) return;
-
-        updateRealtimeOverlay(data);
-
-        // -------------------------------------------------
-        // HANDLE DETECTION
-        // -------------------------------------------------
-
-        if (data.detected) {
-
-            const now = Date.now();
-
-            // Always increment total detections
-            rtTotalDetections++;
-            document.getElementById('rtTotal').textContent = rtTotalDetections;
-
-            // Cooldown only affects session logging
-            if (now - rtLastDetectionTime < RT_DETECTION_COOLDOWN) {
-                return;
-            }
-
-            rtLastDetectionTime = now;
-
-            const currentLat = gpsData.lat;
-            const currentLng = gpsData.lng;
-
-            // Skip if GPS not ready
-            if (currentLat == null || currentLng == null) return;
-
-            // Ignore low confidence
-            if (data.confidence < RT_CONF_THRESHOLD) return;
-
-            // Start detection session
-            if (!rtDetectionSession) {
-
-                rtDetectionSession = {
-                    first_damage: {
-                        damage_type: data.damage_type,
-                        confidence: data.confidence,
-                        image: data.annotated_image,
-                        lat: currentLat,
-                        lng: currentLng,
-                        text: gpsData.locationText
-                    },
-                    last_damage: null,
-                    intermediate_locations: [],
-                    valid_detections: 0
-                };
-
-                rtSessionStartTime = Date.now();
-
-                console.log("Dashcam detection session started");
-            }
-
-            // Count valid detection
-            rtDetectionSession.valid_detections++;
-
-            // Limit payload size
-            if (rtDetectionSession.intermediate_locations.length < 50) {
-
-                rtDetectionSession.intermediate_locations.push({
-                    lat: currentLat,
-                    lng: currentLng,
-                    confidence: data.confidence
-                });
-
-            }
-
-            // Update last damage
-            rtDetectionSession.last_damage = {
-                damage_type: data.damage_type,
-                confidence: data.confidence,
-                image: data.annotated_image,
-                lat: currentLat,
-                lng: currentLng,
-                text: gpsData.locationText
-            };
-
-        }
-
-        // -------------------------------------------------
-        // AUTO SUBMIT CHECK (runs every frame)
-        // -------------------------------------------------
-
-        if (rtDetectionSession && rtSessionStartTime) {
-
-            const elapsed = Date.now() - rtSessionStartTime;
-
-            if (elapsed >= RT_REPORT_INTERVAL) {
-
-                console.log("Auto submitting dashcam report after 30 seconds");
-
-                if (rtDetectionSession.last_damage) {
-                    submitDashcamSession(rtDetectionSession);
-                }
-
-                rtDetectionSession = null;
-                rtSessionStartTime = null;
-
-                // Reset cooldown
-                rtLastDetectionTime = Date.now();
+    
+    // Instead of Base64 toString processing overhead, use native binary Blobs
+    rtCanvas.toBlob((blob) => {
+        if (blob && rtSocket.readyState === WebSocket.OPEN) {
+            // Push binary bytes to websocket
+            rtSocket.send(blob);
+            
+            rtFramesSent++;
+            document.getElementById('rtFrames').textContent = rtFramesSent;
+            
+            // Periodically ping GPS so server can track context
+            if (rtFramesSent % 30 === 1) { // Send GPS on frame 1, 31, 61, etc.
+                rtSocket.send(JSON.stringify({
+                    type: 'gps',
+                    location: gpsData.locationText || '',
+                    lat: gpsData.lat,
+                    lng: gpsData.lng
+                }));
             }
         }
-
-    }
-    catch (err) {
-        console.warn("Realtime frame error:", err);
-    }
-    finally {
+        // Allow next frame in loop
         rtRequestInFlight = false;
-    }
+    }, 'image/jpeg', 0.6); // slight compression is still required to keep packets small
 }
 
 // Stores last realtime detection for manual submit
@@ -372,8 +311,63 @@ function updateRealtimeOverlay(data) {
 
         rtLastDetection = data;
 
-        document.getElementById('rtLastDetectionLabel').textContent =
-            `${data.damage_type} — ${(data.confidence * 100).toFixed(0)}% confidence`;
+        const potLabel = document.getElementById('rtLastDetectionPothole');
+        const waterLabel = document.getElementById('rtLastDetectionWaterlog');
+        const hazardToast = document.getElementById('hazardToast');
+        const hazardToastText = document.getElementById('hazardToastText');
+        
+        if (potLabel) potLabel.style.display = 'none';
+        if (waterLabel) waterLabel.style.display = 'none';
+
+        const rawTypes = data.damage_type.split(',').map(d => d.trim().toLowerCase());
+        const confText = `— ${(data.confidence * 100).toFixed(0)}% confidence`;
+
+        if (rawTypes.includes('pothole') && potLabel) {
+             potLabel.textContent = `Pothole Detected ${confText}`;
+             potLabel.style.display = 'block';
+        }
+        
+        // Hazard / Accident Notification Logic
+        let showHazard = false;
+        
+        if (rawTypes.includes('waterlogging') && waterLabel) {
+             waterLabel.textContent = `Waterlogging Detected ${confText}`;
+             waterLabel.style.display = 'block';
+             
+             if (data.hidden_pothole_prob && hazardToast) {
+                 hazardToastText.textContent = `Wet road — ${data.hidden_pothole_prob}% chance of a hidden pothole!`;
+                 showHazard = true;
+             }
+        }
+        
+        if (rawTypes.includes('accident')) {
+             if (hazardToast) {
+                 hazardToastText.textContent = `CRITICAL: Accident detected! Calling Emergency Services (100)...`;
+                 showHazard = true;
+             }
+        }
+        
+        if (hazardToast) {
+            if (showHazard) {
+                if (window.hazardToastHideTid) {
+                    clearTimeout(window.hazardToastHideTid);
+                    window.hazardToastHideTid = null;
+                }
+                hazardToast.classList.add('show');
+            } else if (hazardToast.classList.contains('show')) {
+                if (!window.hazardToastHideTid) {
+                    window.hazardToastHideTid = setTimeout(() => {
+                        hazardToast.classList.remove('show');
+                        window.hazardToastHideTid = null;
+                    }, 1000);
+                }
+            }
+        }
+        
+        if (!rawTypes.includes('pothole') && !rawTypes.includes('waterlogging') && potLabel) {
+             potLabel.textContent = `${data.damage_type} ${confText}`;
+             potLabel.style.display = 'block';
+        }
 
         const img = document.getElementById('rtLastDetectionImg');
 
@@ -392,36 +386,52 @@ function updateRealtimeOverlay(data) {
 
         overlay.innerHTML =
             `<span class="detection-label no-damage">✓ No Damage</span>`;
+            
+        const hazardToast = document.getElementById('hazardToast');
+        if (hazardToast && hazardToast.classList.contains('show')) {
+            if (!window.hazardToastHideTid) {
+                window.hazardToastHideTid = setTimeout(() => {
+                    hazardToast.classList.remove('show');
+                    window.hazardToastHideTid = null;
+                }, 1000);
+            }
+        }
     }
 }
 
-async function submitDashcamSession(session) {
 
-    try {
+function updateSessionLogUI() {
+    const container = document.getElementById('rtSessionLog');
+    const countEl = document.getElementById('rtSavedCount');
+    if (!container) return;
 
-        const res = await fetch("/api/dashcam/submit-dashcam-session", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${Auth.getToken()}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                first_damage: session.first_damage,
-                last_damage: session.last_damage,
-                intermediate_locations: session.intermediate_locations
-            })
-        });
+    if (countEl) countEl.textContent = rtSessionLog.length;
 
-        const data = await res.json();
+    // Show the session log section
+    const section = document.getElementById('rtSessionLogSection');
+    if (section) section.style.display = 'block';
 
-        if (res.ok) {
-            console.log("Dashcam session saved:", data.report_id);
-            showToast(`Dashcam report saved (${session.valid_detections} detections)`);
-        }
-
-    } catch (err) {
-        console.warn("Dashcam session submit failed:", err);
-    }
+    // Build log entries (newest first)
+    container.innerHTML = rtSessionLog.slice().reverse().map(entry => `
+        <div style="
+            display:flex; gap:0.75rem; align-items:center;
+            padding:0.6rem; background:#f8fafc;
+            border:1px solid #e2e8f0; border-radius:8px;
+        ">
+            ${entry.image
+                ? `<img src="${entry.image}" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid #cbd5e1;" alt="Detection"/>`
+                : `<div style="width:64px;height:64px;background:#e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📷</div>`
+            }
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:#1e293b;font-size:0.85rem;">
+                    ${entry.damage_type} — ${(entry.confidence * 100).toFixed(0)}%
+                </div>
+                <div style="color:#64748b;font-size:0.75rem;margin-top:2px;">
+                    ${entry.time} · Report #${entry.report_id.slice(0, 8)}
+                </div>
+            </div>
+        </div>
+    `).join('');
 }
 
 function stopRealtime() {
@@ -430,6 +440,11 @@ function stopRealtime() {
     if (rtInterval) {
         clearInterval(rtInterval);
         rtInterval = null;
+    }
+    
+    if (rtSocket) {
+        rtSocket.close();
+        rtSocket = null;
     }
 
     if (rtStream) {
@@ -519,12 +534,16 @@ async function switchCamera() {
         video.srcObject = rtStream;
 
         video.onloadedmetadata = () => {
-
-            // Reduce resolution for faster detection
-            rtCanvas.width = 416;
-            rtCanvas.height = 416;
+            // Match TensorRT model tile size natively
+            rtCanvas.width = 640;
+            rtCanvas.height = 640;
 
             rtCtx = rtCanvas.getContext('2d');
+            
+            // Re-init socket for new camera config context
+            if(!rtSocket || rtSocket.readyState !== WebSocket.OPEN) {
+                initWebSocket();
+            }
 
             startRealtimeLoop(); // start adaptive loop
         };
@@ -725,12 +744,16 @@ async function startRealtimeLoop() {
 
     const elapsed = performance.now() - start;
 
-    // Adjust delay based on processing time
-    if (elapsed > 600) {
-        rtDynamicDelay = Math.min(rtDynamicDelay + 100, rtMaxDelay);
+    // For Binary WebSocket sending, latency overhead is practically zero on the Javascript side.
+    // However, to avoid fully saturating low-end device CPU, we keep a fast stable delay to target ~25 FPS
+    const BASE_TARGET_DELAY = 40;
+    
+    // Adjust delay slightly to keep pushing bytes natively
+    if (elapsed > 100) {
+        rtDynamicDelay = Math.min(rtDynamicDelay + 10, 150);
     } 
-    else if (elapsed < 300) {
-        rtDynamicDelay = Math.max(rtDynamicDelay - 50, rtMinDelay);
+    else if (elapsed < 30) {
+        rtDynamicDelay = Math.max(rtDynamicDelay - 5, BASE_TARGET_DELAY);
     }
 
     setTimeout(startRealtimeLoop, rtDynamicDelay);

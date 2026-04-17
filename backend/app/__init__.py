@@ -10,6 +10,9 @@ db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 
+from flask_sock import Sock
+sock = Sock()
+
 
 def create_app(config_class=Config):
     # Serve frontend from project root
@@ -29,6 +32,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
     jwt.init_app(app)
+    sock.init_app(app)
 
     # ------------------------
     # CORS
@@ -84,6 +88,37 @@ def create_app(config_class=Config):
     from app.dashcam import dashcam_bp
     app.register_blueprint(dashcam_bp)
 
+    from app.api_tender import tender_bp
+    app.register_blueprint(tender_bp)
 
+    # --------------------------------------------------
+    # Lightweight migration: add new columns to existing tables
+    # --------------------------------------------------
+    with app.app_context():
+        db.create_all()
+        _run_migrations(app)
 
     return app
+
+
+def _run_migrations(app):
+    """Add new columns to existing SQLite tables (idempotent)."""
+    import sqlite3
+
+    migrations = [
+        (app.config['SQLALCHEMY_BINDS']['infra_auth_db'], "ALTER TABLE devices ADD COLUMN email VARCHAR(120)"),
+        (app.config['SQLALCHEMY_BINDS']['infra_damage_db'], "ALTER TABLE damage_reports ADD COLUMN user_email VARCHAR(120)"),
+        # work_orders table is fully created by db.create_all() via the WorkOrder model;
+        # this migration entry is a no-op placeholder kept for reference only.
+    ]
+    for db_uri, sql in migrations:
+        try:
+            # Extract file path from sqlite:/// URI
+            db_path = db_uri.replace('sqlite:///', '')
+            conn = sqlite3.connect(db_path)
+            conn.execute(sql)
+            conn.commit()
+            conn.close()
+            app.logger.info(f"Migration applied: {sql}")
+        except Exception:
+            pass  # column already exists

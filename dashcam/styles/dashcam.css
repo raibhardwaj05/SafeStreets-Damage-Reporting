@@ -211,9 +211,20 @@ button {
 }
 
 @keyframes pulse {
-    0% { transform: scale(0.95); opacity: 0.7; }
-    50% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(0.95); opacity: 0.7; }
+    0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
 }
 
 .detection-overlay {
@@ -414,12 +425,205 @@ button {
     .rt-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .page-header__title {
         font-size: 1.75rem;
     }
-    
+
     .report-form-container {
         padding: 1.5rem;
     }
+}
+
+/* ── Modal (shared) ───────────────────────────────────────── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-container {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 2rem;
+    max-width: 480px;
+    width: 92%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    animation: modalIn 0.22s ease;
+    border: 1px solid #e5e7eb;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.modal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s, transform 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    background: #f3f4f6;
+    color: #111827;
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    display: flex;
+    gap: 1rem;
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    white-space: pre-line;
+    font-size: 0.9rem;
+}
+
+.modal-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.modal-icon.info {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.modal-icon.success {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.modal-icon.warning {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.modal-icon.error {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    background: #f9fafb;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* "?"? Hazard Toast Warning "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"? */
+.hazard-toast {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    background: rgba(220, 38, 38, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.hazard-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.hazard-toast-icon {
+    font-size: 24px;
+    animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
+
+.hazard-toast-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.hazard-toast-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.hazard-toast-text {
+    font-weight: 600;
+    font-size: 1rem;
 }

@@ -1,4 +1,4 @@
-// Work Monitoring Screen JavaScript
+// Work Monitoring Screen JavaScript for Citizen Reports
 
 // Data fetched from API
 let workOrdersData = [];
@@ -26,19 +26,58 @@ async function initMonitoring() {
     currentWork = workOrdersData.find(w => w.id === id || w.reportId === id);
 
     if (currentWork || currentReport) {
-        if (currentWork) {
-            // Internal hidden selector for compatibility with legacy functions if any
-            const selector = document.getElementById('workSelector');
-            if (selector) {
-                selector.innerHTML = `<option value="${currentWork.id}">${currentWork.id}</option>`;
-                selector.value = currentWork.id;
+        // Check for persisted state in IndexedDB
+        const savedState = await ReportStorage.get(id);
+        if (savedState) {
+            if (currentReport) {
+                currentReport.status = 'resolved';
+                currentReport.resolved_at = savedState.resolvedAt;
+                currentReport.persistedDescription = savedState.description;
+                currentReport.persistedOfficer = savedState.officer;
+                currentReport.persistedAfterPhoto = savedState.afterPhoto;
             }
         }
+
         loadWorkDetails();
+        
+        // If persisted, show the success summary directly
+        if (savedState) {
+            showResolutionSummary();
+        }
     } else {
         // Fallback
         document.getElementById('activeWorksList').style.display = 'block';
         renderActiveWorks();
+    }
+}
+
+/**
+ * Show resolution summary when report is resolved (persisted)
+ */
+function showResolutionSummary() {
+    const completionSection = document.querySelector('.completion-section');
+    if (completionSection && currentReport) {
+        completionSection.innerHTML = `
+            <h2>Report Resolved</h2>
+            <div class="completion-card stat-card" style="background: #f0fdf4; border-color: #22c55e; padding: 1.5rem; border-radius: 12px; margin-top: 1rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; color: #166534;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span style="font-weight: 700; font-size: 1.1rem;">Issue Successfully Resolved</span>
+                    </div>
+                    <p style="margin: 0.5rem 0 0.25rem 0; font-size: 0.95rem; opacity: 0.9;"><strong>Work Summary:</strong> ${currentReport.persistedDescription || 'Issue resolved according to standards.'}</p>
+                    <p style="margin: 0; font-size: 0.9rem; font-weight: 600; opacity: 0.8;">Verified by: ${currentReport.persistedOfficer || 'Official'}</p>
+                </div>
+            </div>
+        `;
+        
+        // Also update the After image if saved
+        const afterImg = document.getElementById('afterPhoto');
+        if (afterImg && currentReport.persistedAfterPhoto) {
+            afterImg.src = currentReport.persistedAfterPhoto;
+        }
     }
 }
 
@@ -61,7 +100,7 @@ async function fetchWorkOrders() {
             // Transform
             workOrdersData = data.map(r => ({
                 id: r.id,
-                reportId: r.id, // Using Work ID as report ID ref for now
+                reportId: r.id, 
                 location: r.location,
                 contractor: (r.contractor && r.contractor.name) || 'Not Assigned',
                 status: r.status === 'resolved' ? 'completed' : (r.status === 'assigned' ? 'in-progress' : 'pending'),
@@ -119,30 +158,60 @@ function renderTimeline() {
     let currentStageIndex = steps.indexOf(currentReport.status);
     if (currentStageIndex === -1) {
         if (currentReport.status === 'verified' || currentReport.status === 'approved') currentStageIndex = 1;
-        else if (currentReport.status === 'assigned') currentStageIndex = 2;
+        else if (currentReport.status === 'assigned') currentStageIndex = 3; 
         else if (currentReport.status === 'in-progress') currentStageIndex = 3;
         else if (currentReport.status === 'resolved') currentStageIndex = 4;
         else if (currentReport.status === 'rejected') currentStageIndex = 0;
         else currentStageIndex = 0;
+    } else if (currentReport.status === 'assigned') {
+        currentStageIndex = 3; 
     }
 
-    const timelineData = labels.map((label, idx) => ({
-        step: label,
-        date: idx <= currentStageIndex ? (idx === 0 ? new Date(currentReport.created_at).toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }) : (idx === currentStageIndex ? 'Current' : 'Done')) : 'Pending',
-        completed: idx < currentStageIndex,
-        active: idx === currentStageIndex
-    }));
+    const formatDate = (dateStr) => {
+        if (!dateStr) return null;
+        return new Date(dateStr).toLocaleString('en-US', { 
+            year: 'numeric', 
+            month: 'numeric', 
+            day: 'numeric', 
+            hour: 'numeric', 
+            minute: 'numeric', 
+            hour12: true 
+        });
+    };
+
+    const timelineData = labels.map((item, idx) => {
+        let dateDisplay = 'Pending';
+        if (idx <= currentStageIndex) {
+            let timestamp = currentReport.created_at; 
+
+            if (idx === 1) {
+                timestamp = currentReport.verified_at || currentReport.created_at;
+            } else if (idx === 2) {
+                timestamp = currentReport.assigned_at || (currentWork ? currentWork.assignedDate : currentReport.created_at);
+            } else if (idx === 3) {
+                timestamp = currentReport.in_progress_at || (currentWork ? currentWork.assignedDate : currentReport.created_at);
+            } else if (idx === 4) {
+                timestamp = currentReport.resolved_at || currentReport.created_at;
+            }
+
+            dateDisplay = formatDate(timestamp);
+        }
+
+        return {
+            step: item,
+            date: dateDisplay,
+            completed: idx <= currentStageIndex
+        };
+    });
 
     timelineContainer.innerHTML = timelineData.map((item, index) => {
         let dotClass = 'timeline-dot';
-        if (item.completed || item.active) dotClass += ' completed-active';
+        if (item.completed) dotClass += ' completed-active';
 
         let iconHtml = '';
-        if (item.completed || item.active) {
-            // White checkmark for completed/active
+        if (item.completed) {
             iconHtml = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
         } else {
-            // Darker gray dot for pending
             iconHtml = `<div style="width: 6px; height: 6px; border-radius: 50%; background-color: #94a3b8;"></div>`;
         }
 
@@ -192,31 +261,31 @@ function renderStatusIndicator() {
             </div>
         `;
     } else if (currentReport) {
-        const statusText = currentReport.status.charAt(0).toUpperCase() + currentReport.status.slice(1);
+        const reportIdFull = currentReport.id || '';
+        const reportIdDisplay = reportIdFull ? reportIdFull.split('-')[0].substring(0, 8) : 'Unknown';
+        
+        const statusText = (currentReport.status || 'pending').charAt(0).toUpperCase() + (currentReport.status || 'pending').slice(1);
         const statusClass = ['in-progress', 'assigned'].includes(currentReport.status) ? 'in-progress' :
             (currentReport.status === 'resolved' ? 'completed' : 'pending');
 
         indicator.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem;">
                 <div>
-                    <h3 style="margin: 0; color: #1e293b; font-size: 1.2rem;">Report #<span title="${currentReport.id}">${currentReport.id.split('-')[0].substring(0, 8)}</span></h3>
-                    <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.9rem;">Filed locally</p>
+                    <h3 style="margin: 0; color: #1e293b; font-size: 1.2rem;">Report #<span title="${reportIdFull}">${reportIdDisplay}</span></h3>
+                    <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.9rem;">Filed by: ${currentReport.reported_by || 'Unknown'}</p>
                 </div>
                 <div class="status-badge ${statusClass}" style="margin: 0;">${statusText}</div>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; text-align: left;">
                 <div>
                     <span style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 0.25rem; font-weight: 600; text-transform: uppercase;">Location</span>
-                    <strong style="color: #1e293b; font-size: 1.05rem;">${currentReport.location}</strong>
+                    <strong style="color: #1e293b; font-size: 1.05rem;">${currentReport.location || 'N/A'}</strong>
                 </div>
             </div>
         `;
     }
 }
 
-/**
- * Render photos
- */
 /**
  * Render photos dynamically from report data
  */
@@ -238,7 +307,7 @@ async function renderPhotos() {
                 beforeImg.src = currentReport.image_url;
             }
         } catch (err) {
-            console.error('Image load failed');
+            console.error('Before Image load failed', err);
             beforeImg.src = 'https://via.placeholder.com/600x400/f1f5f9/94a3b8?text=Image+Load+Failed';
         }
     }
@@ -252,7 +321,10 @@ async function renderPhotos() {
     }
 
     // 2. Handle the "After" image (Repair documentation)
-    if (currentWork && currentWork.afterPhoto) {
+    // If not persisted, check currentWork
+    if (currentReport && currentReport.persistedAfterPhoto) {
+        afterImg.src = currentReport.persistedAfterPhoto;
+    } else if (currentWork && currentWork.afterPhoto) {
         afterImg.src = currentWork.afterPhoto;
     } else {
         afterImg.src = 'https://via.placeholder.com/600x400/f1f5f9/94a3b8?text=Repair+Photo+Pending';
@@ -330,6 +402,121 @@ function markCompleted() {
             window.location.href = 'dashboard.html';
         });
     });
+}
+
+/**
+ * Handle "After" image upload preview
+ */
+function handleAfterImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check if it's an image
+    if (!file.type.startsWith('image/')) {
+        showAlert('Invalid File', 'Please upload an image file.', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const afterImg = document.getElementById('afterPhoto');
+        if (afterImg) {
+            const imageData = e.target.result;
+            afterImg.src = imageData;
+            
+            // Store temporarily in currentReport for saving later
+            if (!currentReport) currentReport = {};
+            currentReport.tempAfterPhoto = imageData;
+            currentReport.fileToUpload = file;
+            
+            // Enable verification checkbox
+            const checkbox = document.getElementById('completionCheckbox');
+            const wrapper = document.getElementById('checkboxWrapper');
+            const helper = document.getElementById('uploadHelperText');
+            
+            if (checkbox && wrapper) {
+                checkbox.disabled = false;
+                wrapper.classList.remove('disabled');
+                if (helper) helper.style.display = 'none';
+            }
+            
+            showAlert('Success', 'Repair photo uploaded. You can now verify the report.', 'success');
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+/**
+ * Toggle Submit Button based on checkbox
+ */
+function toggleSubmitButton() {
+    const checkbox = document.getElementById('completionCheckbox');
+    const submitBtn = document.getElementById('submitReportBtn');
+    if (checkbox && submitBtn) {
+        submitBtn.disabled = !checkbox.checked;
+    }
+}
+
+/**
+ * Submit final report and resolve it
+ */
+async function submitFinalReport() {
+    const descriptionField = document.getElementById('completionDescription');
+    const description = descriptionField ? descriptionField.value : '';
+    const officerName = localStorage.getItem('user_name') || 'Official';
+    const resolvedAt = new Date().toISOString();
+    
+    // Safety check for ID
+    const reportId = (currentReport && currentReport.id) || (new URLSearchParams(window.location.search)).get('id');
+
+    if (!reportId) {
+        showAlert('Error', 'Missing report identifier.', 'error');
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('description', description);
+        if (currentReport && currentReport.fileToUpload) {
+            formData.append('after_image', currentReport.fileToUpload);
+        }
+
+        const response = await Auth.fetchWithAuth(`/api/official/reports/${reportId}/resolve`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.msg || 'Resolution failed');
+        }
+
+        // Save to IndexedDB for persistence backup
+        const stateToSave = {
+            description: description,
+            officer: officerName,
+            resolvedAt: resolvedAt,
+            afterPhoto: (currentReport && currentReport.tempAfterPhoto) || null
+        };
+        await ReportStorage.save(reportId, stateToSave);
+        
+        // Fetch updated report from backend
+        await fetchReportDetails(reportId);
+
+        // Refresh UI
+        renderTimeline();
+        renderStatusIndicator();
+        renderPhotos();
+        
+        // Show success summary
+        showResolutionSummary();
+        
+        showAlert('Success', 'Report has been marked as completed!', 'success');
+        
+    } catch (error) {
+        console.error('Error submitting report:', error);
+        showAlert('Error', 'Failed to update report status.', 'error');
+    }
 }
 
 // Initialize when page loads

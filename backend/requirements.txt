@@ -10,4 +10,9 @@ ultralytics
 opencv-python-headless
 Werkzeug
 pdfplumber
-gunicorn
+openai
+requests
+playwright
+
+flask-sock
+simple-websocket
